@@ -108,12 +108,10 @@
         .player-head {
             width: 40px;
             height: 40px;
-            background: #4a4a4a;
             border-radius: 8px;
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" fill="%23654321"/><rect x="4" y="4" width="8" height="8" fill="%23d4a574"/><rect x="5" y="6" width="2" height="2" fill="%23000"/><rect x="9" y="6" width="2" height="2" fill="%23000"/><rect x="6" y="9" width="4" height="1" fill="%23000"/></svg>');
-            background-size: cover;
             border: 2px solid #00ff88;
             box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+            object-fit: cover;
         }
 
         .time {
@@ -204,32 +202,6 @@
             background: linear-gradient(45deg, #00cc66, #00ff88);
         }
 
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            th, td {
-                padding: 10px 5px;
-                font-size: 0.9rem;
-            }
-            
-            .player {
-                flex-direction: column;
-                gap: 5px;
-                text-align: center;
-            }
-            
-            .player-head {
-                width: 30px;
-                height: 30px;
-            }
-        }
-
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -255,6 +227,13 @@
         .stat-label {
             font-size: 0.9rem;
             opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            th, td { padding: 10px 5px; font-size: 0.9rem; }
+            .player { flex-direction: column; gap: 5px; text-align: center; }
         }
     </style>
 </head>
@@ -291,20 +270,18 @@
                             <th>Wersja</th>
                         </tr>
                     </thead>
-                    <tbody id="leaderboardBody">
-                        <!-- Wyniki będą dodawane dynamicznie -->
-                    </tbody>
+                    <tbody id="leaderboardBody"></tbody>
                 </table>
             </div>
         </div>
 
         <div class="form-section">
-            <h2>📝 Dodaj swój wynik</h2>
+            <h2>📝 Panel Administratora</h2>
             <form id="speedrunForm">
                 <div class="form-grid">
                     <div class="input-group">
                         <label for="playerName">Nick gracza:</label>
-                        <input type="text" id="playerName" name="playerName" required placeholder="Twój nick...">
+                        <input type="text" id="playerName" name="playerName" required placeholder="Nick z Minecrafta...">
                     </div>
                     <div class="input-group">
                         <label for="hours">Godziny:</label>
@@ -312,7 +289,7 @@
                     </div>
                     <div class="input-group">
                         <label for="minutes">Minuty:</label>
-                        <input type="number" id="minutes" name="minutes" min="0" max="59" required placeholder="25">
+                        <input type="number" id="minutes" name="minutes" min="0" max="59" required placeholder="15">
                     </div>
                     <div class="input-group">
                         <label for="seconds">Sekundy:</label>
@@ -324,126 +301,121 @@
                             <option value="">Wybierz wersję...</option>
                             <option value="1.16.1">1.16.1</option>
                             <option value="1.16.5">1.16.5</option>
-                            <option value="1.17.1">1.17.1</option>
-                            <option value="1.18.2">1.18.2</option>
-                            <option value="1.19.2">1.19.2</option>
                             <option value="1.20.1">1.20.1</option>
                         </select>
                     </div>
                 </div>
-                <button type="submit" class="submit-btn">🚀 Dodaj wynik do leaderboard</button>
+                <button type="submit" class="submit-btn">🚀 Dodaj wynik (wymaga hasła)</button>
             </form>
         </div>
     </div>
 
     <script>
-      // Dane do połączenia z Twoją bazą (znajdziesz je w Supabase -> Settings -> API)
-const SUPABASE_URL = 'https://tedjwbyhwqakosdbaclu.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_X8gSRqd8MHfgEvQNWkR9nA_1qVyBzB7';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // KONFIGURACJA SUPABASE
+        const SUPABASE_URL = 'https://tedjwbyhwqakosdbaclu.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_X8gSRqd8MHfgEvQNWkR9nA_1qVyBzB7';
+        const ADMIN_PASSWORD = "DZJAgNuTccieL1FG"; 
 
-// TWOJE TAJNE HASŁO DO DODAWANIA WYNIKÓW
-const ADMIN_PASSWORD = "DZJAgNuTccieL1FG"; 
+        // Inicjalizacja klienta (używamy innej nazwy zmiennej dla bezpieczeństwa)
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let speedruns = [];
+        let speedruns = [];
 
-// 1. POBIERANIE DANYCH Z BAZY (Dla wszystkich)
-async function fetchSpeedruns() {
-    const { data, error } = await supabase
-        .from('speedruns')
-        .select('*');
-    
-    if (error) console.error('Błąd pobierania:', error);
-    else {
-        speedruns = data;
-        renderLeaderboard();
-    }
-}
+        // Funkcje pomocnicze czasu
+        function timeToSeconds(h, m, s) { return h * 3600 + m * 60 + s; }
+        function secondsToTime(totalSec) {
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = totalSec % 60;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
 
-function timeToSeconds(hours, minutes, seconds) {
-    return hours * 3600 + minutes * 60 + seconds;
-}
+        // Pobieranie danych z bazy
+        async function fetchSpeedruns() {
+            const { data, error } = await _supabase
+                .from('speedruns')
+                .select('*');
+            
+            if (error) {
+                console.error('Błąd pobierania:', error);
+            } else {
+                speedruns = data || [];
+                renderLeaderboard();
+            }
+        }
 
-function secondsToTime(totalSeconds) {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
+        // Renderowanie tabeli
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
 
-function updateStats() {
-    const totalRuns = speedruns.length;
-    document.getElementById('totalRuns').textContent = totalRuns;
+            const sortedRuns = [...speedruns].sort((a, b) => {
+                return timeToSeconds(a.hours, a.minutes, a.seconds) - timeToSeconds(b.hours, b.minutes, b.seconds);
+            });
 
-    if (totalRuns > 0) {
-        const times = speedruns.map(run => timeToSeconds(run.hours, run.minutes, run.seconds));
-        const bestTime = Math.min(...times);
-        const avgTime = Math.floor(times.reduce((a, b) => a + b, 0) / times.length);
+            sortedRuns.forEach((run, index) => {
+                const row = document.createElement('tr');
+                const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
+                
+                row.innerHTML = `
+                    <td><span class="rank ${rankClass}">${index + 1}</span></td>
+                    <td>
+                        <div class="player">
+                            <img src="https://mc-heads.net/avatar/${run.name}/40" class="player-head" alt="head">
+                            <span>${run.name}</span>
+                        </div>
+                    </td>
+                    <td><span class="time">${run.hours.toString().padStart(2, '0')}:${run.minutes.toString().padStart(2, '0')}:${run.seconds.toString().padStart(2, '0')}</span></td>
+                    <td><span class="version">${run.version}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+            updateStats();
+        }
 
-        document.getElementById('bestTime').textContent = secondsToTime(bestTime);
-        document.getElementById('avgTime').textContent = secondsToTime(avgTime);
-    }
-}
+        function updateStats() {
+            const total = speedruns.length;
+            document.getElementById('totalRuns').textContent = total;
+            if (total > 0) {
+                const times = speedruns.map(r => timeToSeconds(r.hours, r.minutes, r.seconds));
+                document.getElementById('bestTime').textContent = secondsToTime(Math.min(...times));
+                document.getElementById('avgTime').textContent = secondsToTime(Math.floor(times.reduce((a,b)=>a+b,0)/total));
+            }
+        }
 
-function renderLeaderboard() {
-    const tbody = document.getElementById('leaderboardBody');
-    tbody.innerHTML = '';
+        // Obsługa formularza
+        document.getElementById('speedrunForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const pass = prompt("Podaj hasło administratora:");
+            if (pass !== ADMIN_PASSWORD) {
+                alert("❌ Nie masz uprawnień!");
+                return;
+            }
 
-    const sortedRuns = speedruns.sort((a, b) => {
-        return timeToSeconds(a.hours, a.minutes, a.seconds) - timeToSeconds(b.hours, b.minutes, b.seconds);
-    });
+            const newRun = {
+                name: document.getElementById('playerName').value,
+                hours: parseInt(document.getElementById('hours').value),
+                minutes: parseInt(document.getElementById('minutes').value),
+                seconds: parseInt(document.getElementById('seconds').value),
+                version: document.getElementById('version').value
+            };
 
-    sortedRuns.forEach((run, index) => {
-        const row = document.createElement('tr');
-        const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
-        
-        row.innerHTML = `
-            <td><span class="rank ${rankClass}">${index + 1}</span></td>
-            <td>
-                <div class="player">
-                    <img src="https://mc-heads.net/avatar/${run.name}/40" class="player-head" style="border-radius: 8px;">
-                    <span>${run.name}</span>
-                </div>
-            </td>
-            <td><span class="time">${run.hours.toString().padStart(2, '0')}:${run.minutes.toString().padStart(2, '0')}:${run.seconds.toString().padStart(2, '0')}</span></td>
-            <td><span class="version">${run.version}</span></td>
-        `;
-        tbody.appendChild(row);
-    });
-    updateStats();
-}
+            const { error } = await _supabase.from('speedruns').insert([newRun]);
 
-// 2. DODAWANIE WYNIKU (Tylko z hasłem)
-document.getElementById('speedrunForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const pass = prompt("Podaj hasło administratora:");
-    if (pass !== ADMIN_PASSWORD) {
-        alert("Błędne hasło!");
-        return;
-    }
+            if (error) {
+                alert("Błąd zapisu w bazie! Sprawdź czy tabela 'speedruns' istnieje.");
+                console.error(error);
+            } else {
+                this.reset();
+                const btn = document.querySelector('.submit-btn');
+                btn.textContent = '✅ DODANO!';
+                setTimeout(() => { btn.textContent = '🚀 Dodaj wynik do leaderboard'; fetchSpeedruns(); }, 1500);
+            }
+        });
 
-    const newRun = {
-        name: document.getElementById('playerName').value,
-        hours: parseInt(document.getElementById('hours').value),
-        minutes: parseInt(document.getElementById('minutes').value),
-        seconds: parseInt(document.getElementById('seconds').value),
-        version: document.getElementById('version').value
-    };
-
-    const { error } = await supabase.from('speedruns').insert([newRun]);
-
-    if (error) {
-        alert("Błąd bazy danych!");
-    } else {
-        this.reset();
-        fetchSpeedruns(); // Odśwież tabelę dla wszystkich
-    }
-});
-
-// Start strony
-fetchSpeedruns();
+        // Start
+        fetchSpeedruns();
     </script>
 </body>
 </html>
-
