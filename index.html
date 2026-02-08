@@ -26,9 +26,7 @@
         tr.top-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.07) 0%, transparent 100%); border-left: 5px solid #cd7f32; }
         .player { display: flex; align-items: center; gap: 15px; }
         .player-head { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #00ff88; }
-        .time-box { display: flex; align-items: center; gap: 10px; }
-        .video-link { text-decoration: none; font-size: 1.2rem; filter: grayscale(1); transition: 0.3s; }
-        .video-link:hover { filter: grayscale(0); transform: scale(1.2); }
+        .seed-text { display: block; font-size: 0.7rem; color: #888; font-family: monospace; margin-top: 5px; cursor: help; }
         .form-section { background: rgba(0, 0, 0, 0.8); border-radius: 15px; padding: 30px; border: 1px solid #00ff88; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 20px; }
         input, select { padding: 12px; background: #000; border: 2px solid #333; color: #00ff88; border-radius: 8px; font-family: 'Orbitron'; width: 100%; }
@@ -54,7 +52,7 @@
         <div class="leaderboard">
             <table>
                 <thead>
-                    <tr><th>Miejsce</th><th>Gracz</th><th>Czas (+Wideo)</th><th>Wersja</th><th>Akcja</th></tr>
+                    <tr><th>Miejsce</th><th>Gracz</th><th>Czas (+Seed)</th><th>Wersja</th><th>Akcja</th></tr>
                 </thead>
                 <tbody id="leaderboardBody"></tbody>
             </table>
@@ -73,7 +71,7 @@
                         <option value="1.20.1">1.20.1</option>
                     </select>
                 </div>
-                <input type="url" id="videoUrl" placeholder="Link do YouTube (opcjonalnie)" style="margin-bottom: 20px;">
+                <input type="text" id="seed" placeholder="Minecraft Seed (opcjonalnie)" style="margin-bottom: 20px;">
                 <button type="submit" class="submit-btn">🚀 Wyślij wynik</button>
             </form>
         </div>
@@ -97,7 +95,6 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let speedruns = [];
 
-        // FUNKCJA SPRAWDZAJĄCA HASŁO PRZEZ SERVERLESS API
         async function verifyPasswordOnServer(input) {
             try {
                 const response = await fetch('/api/check-password', {
@@ -107,10 +104,7 @@
                 });
                 const result = await response.json();
                 return result.success;
-            } catch (e) {
-                console.error("Błąd serwera:", e);
-                return false;
-            }
+            } catch (e) { return false; }
         }
 
         function getPassword() {
@@ -124,9 +118,7 @@
                 input.focus();
                 const close = (val) => {
                     modal.style.display = 'none';
-                    confirmBtn.onclick = null;
-                    cancelBtn.onclick = null;
-                    input.onkeydown = null;
+                    confirmBtn.onclick = null; cancelBtn.onclick = null; input.onkeydown = null;
                     resolve(val);
                 };
                 confirmBtn.onclick = () => close(input.value);
@@ -151,9 +143,9 @@
         async function deleteRun(id) {
             const pass = await getPassword();
             if (pass && await verifyPasswordOnServer(pass)) {
-                const { error } = await _supabase.from('speedruns').delete().eq('id', id);
-                if (!error) fetchRuns();
-            } else if (pass !== null) { alert("❌ Błędne hasło lub błąd serwera!"); }
+                await _supabase.from('speedruns').delete().eq('id', id);
+                fetchRuns();
+            } else if (pass !== null) { alert("❌ Brak autoryzacji!"); }
         }
 
         function render() {
@@ -166,8 +158,19 @@
                 if (i === 0) { rCls = 'rank-1'; row.className = 'top-1'; }
                 else if (i === 1) { rCls = 'rank-2'; row.className = 'top-2'; }
                 else if (i === 2) { rCls = 'rank-3'; row.className = 'top-3'; }
-                const videoIcon = run.video_url ? `<a href="${run.video_url}" target="_blank" class="video-link">📺</a>` : '';
-                row.innerHTML = `<td><span class="rank ${rCls}">${i + 1}</span></td><td><div class="player"><img src="https://mc-heads.net/avatar/${run.name}/40" class="player-head"><span>${run.name}</span></div></td><td><div class="time-box"><span class="time">${sToT(tToS(run.hours, run.minutes, run.seconds))}</span>${videoIcon}</div></td><td><span style="background:#222; padding:4px 10px; border-radius:15px; font-size:0.8rem;">${run.version}</span></td><td><button class="delete-btn" onclick="deleteRun(${run.id})">🗑️</button></td>`;
+                
+                const seedDisplay = run.seed ? `<span class="seed-text" title="Kliknij aby skopiować" onclick="navigator.clipboard.writeText('${run.seed}'); alert('Skopiowano seed!')">SEED: ${run.seed}</span>` : '';
+
+                row.innerHTML = `
+                    <td><span class="rank ${rCls}">${i + 1}</span></td>
+                    <td><div class="player"><img src="https://mc-heads.net/avatar/${run.name}/40" class="player-head"><span>${run.name}</span></div></td>
+                    <td>
+                        <span class="time">${sToT(tToS(run.hours, run.minutes, run.seconds))}</span>
+                        ${seedDisplay}
+                    </td>
+                    <td><span style="background:#222; padding:4px 10px; border-radius:15px; font-size:0.8rem;">${run.version}</span></td>
+                    <td><button class="delete-btn" onclick="deleteRun(${run.id})">🗑️</button></td>
+                `;
                 tbody.appendChild(row);
             });
             document.getElementById('totalRuns').textContent = speedruns.length;
@@ -188,7 +191,7 @@
                     minutes: parseInt(document.getElementById('minutes').value),
                     seconds: parseInt(document.getElementById('seconds').value),
                     version: document.getElementById('version').value,
-                    video_url: document.getElementById('videoUrl').value
+                    seed: document.getElementById('seed').value
                 };
                 const { error } = await _supabase.from('speedruns').insert([newRun]);
                 if (!error) { this.reset(); fetchRuns(); }
