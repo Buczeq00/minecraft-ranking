@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Speedrun Leaderboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -336,102 +337,113 @@
     </div>
 
     <script>
-        let speedruns = [];
+      // Dane do połączenia z Twoją bazą (znajdziesz je w Supabase -> Settings -> API)
+const SUPABASE_URL = 'https://tedjwbyhwqakosdbaclu.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_X8gSRqd8MHfgEvQNWkR9nA_1qVyBzB7';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        function timeToSeconds(hours, minutes, seconds) {
-            return hours * 3600 + minutes * 60 + seconds;
-        }
+// TWOJE TAJNE HASŁO DO DODAWANIA WYNIKÓW
+const ADMIN_PASSWORD = "DZJAgNuTccieL1FG"; 
 
-        function secondsToTime(totalSeconds) {
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
+let speedruns = [];
 
-        function updateStats() {
-            const totalRuns = speedruns.length;
-            document.getElementById('totalRuns').textContent = totalRuns;
-
-            if (totalRuns > 0) {
-                const times = speedruns.map(run => timeToSeconds(run.hours, run.minutes, run.seconds));
-                const bestTime = Math.min(...times);
-                const avgTime = Math.floor(times.reduce((a, b) => a + b, 0) / times.length);
-
-                document.getElementById('bestTime').textContent = secondsToTime(bestTime);
-                document.getElementById('avgTime').textContent = secondsToTime(avgTime);
-            }
-        }
-
-        function renderLeaderboard() {
-            const tbody = document.getElementById('leaderboardBody');
-            tbody.innerHTML = '';
-
-            const sortedRuns = speedruns.sort((a, b) => {
-                const timeA = timeToSeconds(a.hours, a.minutes, a.seconds);
-                const timeB = timeToSeconds(b.hours, b.minutes, b.seconds);
-                return timeA - timeB;
-            });
-
-            sortedRuns.forEach((run, index) => {
-                const row = document.createElement('tr');
-                const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
-                
-                row.innerHTML = `
-                    <td><span class="rank ${rankClass}">${index + 1}</span></td>
-                    <td>
-                        <div class="player">
-                            <div class="player-head"></div>
-                            <span>${run.name}</span>
-                        </div>
-                    </td>
-                    <td><span class="time">${run.hours.toString().padStart(2, '0')}:${run.minutes.toString().padStart(2, '0')}:${run.seconds.toString().padStart(2, '0')}</span></td>
-                    <td><span class="version">${run.version}</span></td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            updateStats();
-        }
-
-        document.getElementById('speedrunForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const playerName = document.getElementById('playerName').value;
-            const hours = parseInt(document.getElementById('hours').value);
-            const minutes = parseInt(document.getElementById('minutes').value);
-            const seconds = parseInt(document.getElementById('seconds').value);
-            const version = document.getElementById('version').value;
-
-            if (playerName && version && minutes >= 0 && seconds >= 0) {
-                speedruns.push({
-                    name: playerName,
-                    hours: hours,
-                    minutes: minutes,
-                    seconds: seconds,
-                    version: version
-                });
-
-                renderLeaderboard();
-                
-                // Reset form
-                this.reset();
-                
-                // Success feedback
-                const submitBtn = document.querySelector('.submit-btn');
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = '✅ Wynik dodany!';
-                submitBtn.style.background = 'linear-gradient(45deg, #00cc44, #00ff66)';
-                
-                setTimeout(() => {
-                    submitBtn.textContent = originalText;
-                    submitBtn.style.background = 'linear-gradient(45deg, #00ff88, #00cc66)';
-                }, 2000);
-            }
-        });
-
-        // Initialize leaderboard
+// 1. POBIERANIE DANYCH Z BAZY (Dla wszystkich)
+async function fetchSpeedruns() {
+    const { data, error } = await supabase
+        .from('speedruns')
+        .select('*');
+    
+    if (error) console.error('Błąd pobierania:', error);
+    else {
+        speedruns = data;
         renderLeaderboard();
+    }
+}
+
+function timeToSeconds(hours, minutes, seconds) {
+    return hours * 3600 + minutes * 60 + seconds;
+}
+
+function secondsToTime(totalSeconds) {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function updateStats() {
+    const totalRuns = speedruns.length;
+    document.getElementById('totalRuns').textContent = totalRuns;
+
+    if (totalRuns > 0) {
+        const times = speedruns.map(run => timeToSeconds(run.hours, run.minutes, run.seconds));
+        const bestTime = Math.min(...times);
+        const avgTime = Math.floor(times.reduce((a, b) => a + b, 0) / times.length);
+
+        document.getElementById('bestTime').textContent = secondsToTime(bestTime);
+        document.getElementById('avgTime').textContent = secondsToTime(avgTime);
+    }
+}
+
+function renderLeaderboard() {
+    const tbody = document.getElementById('leaderboardBody');
+    tbody.innerHTML = '';
+
+    const sortedRuns = speedruns.sort((a, b) => {
+        return timeToSeconds(a.hours, a.minutes, a.seconds) - timeToSeconds(b.hours, b.minutes, b.seconds);
+    });
+
+    sortedRuns.forEach((run, index) => {
+        const row = document.createElement('tr');
+        const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
+        
+        row.innerHTML = `
+            <td><span class="rank ${rankClass}">${index + 1}</span></td>
+            <td>
+                <div class="player">
+                    <img src="https://mc-heads.net/avatar/${run.name}/40" class="player-head" style="border-radius: 8px;">
+                    <span>${run.name}</span>
+                </div>
+            </td>
+            <td><span class="time">${run.hours.toString().padStart(2, '0')}:${run.minutes.toString().padStart(2, '0')}:${run.seconds.toString().padStart(2, '0')}</span></td>
+            <td><span class="version">${run.version}</span></td>
+        `;
+        tbody.appendChild(row);
+    });
+    updateStats();
+}
+
+// 2. DODAWANIE WYNIKU (Tylko z hasłem)
+document.getElementById('speedrunForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const pass = prompt("Podaj hasło administratora:");
+    if (pass !== ADMIN_PASSWORD) {
+        alert("Błędne hasło!");
+        return;
+    }
+
+    const newRun = {
+        name: document.getElementById('playerName').value,
+        hours: parseInt(document.getElementById('hours').value),
+        minutes: parseInt(document.getElementById('minutes').value),
+        seconds: parseInt(document.getElementById('seconds').value),
+        version: document.getElementById('version').value
+    };
+
+    const { error } = await supabase.from('speedruns').insert([newRun]);
+
+    if (error) {
+        alert("Błąd bazy danych!");
+    } else {
+        this.reset();
+        fetchSpeedruns(); // Odśwież tabelę dla wszystkich
+    }
+});
+
+// Start strony
+fetchSpeedruns();
     </script>
 </body>
 </html>
+
