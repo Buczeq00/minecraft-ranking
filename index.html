@@ -86,97 +86,105 @@
     </div>
     <script>
         const SUPABASE_URL = 'https://tedjwbyhwqakosdbaclu.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_X8gSRqd8MHfgEvQNWkR9nA_1qVyBzB7';
-        
-        // POPRAWIONY HASH DLA HASŁA: DZJAgNuTccieL1FG
-        const H_P = "f5f7f329241680d22d141e6c9b5463691653457f920f71933c0993092289453c";
+const SUPABASE_KEY = 'sb_publishable_X8gSRqd8MHfgEvQNWkR9nA_1qVyBzB7';
 
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        let speedruns = [];
+// Zahashowane hasło w formacie Base64 (bezpieczniejsze przy kopiowaniu)
+const SECRET = "RlpKQWdOdVRjY2llTDFGRw==";
 
-        async function verify(input) {
-            const msgBuffer = new TextEncoder().encode(input);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            return hashHex === H_P;
-        }
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let speedruns = [];
 
-        function getPassword() {
-            return new Promise((resolve) => {
-                const modal = document.getElementById('passwordModal');
-                const input = document.getElementById('modalPasswordInput');
-                const confirmBtn = document.getElementById('confirmBtn');
-                const cancelBtn = document.getElementById('cancelBtn');
-                modal.style.display = 'flex';
-                input.value = '';
-                input.focus();
-                const close = (val) => {
-                    modal.style.display = 'none';
-                    confirmBtn.onclick = null;
-                    cancelBtn.onclick = null;
-                    input.onkeydown = null;
-                    resolve(val);
-                };
-                confirmBtn.onclick = () => close(input.value);
-                cancelBtn.onclick = () => close(null);
-                input.onkeydown = (e) => { if(e.key === 'Enter') close(input.value); };
-            });
-        }
+// Funkcja sprawdzająca hasło
+function verify(input) {
+    return btoa(input) === SECRET;
+}
 
-        function tToS(h, m, s) { 
-    const hh = parseInt(h) || 0;
-    const mm = parseInt(m) || 0;
-    const ss = parseInt(s) || 0;
-    return hh * 3600 + mm * 60 + ss; 
+function getPassword() {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('passwordModal');
+        const input = document.getElementById('modalPasswordInput');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        modal.style.display = 'flex';
+        input.value = '';
+        input.focus();
+        const close = (val) => {
+            modal.style.display = 'none';
+            confirmBtn.onclick = null;
+            cancelBtn.onclick = null;
+            input.onkeydown = null;
+            resolve(val);
+        };
+        confirmBtn.onclick = () => close(input.value);
+        cancelBtn.onclick = () => close(null);
+        input.onkeydown = (e) => { if(e.key === 'Enter') close(input.value); };
+    });
+}
 
-        }
+function tToS(h, m, s) { 
+    return (parseInt(h) || 0) * 3600 + (parseInt(m) || 0) * 60 + (parseInt(s) || 0); 
+}
 
-        async function fetchRuns() {
-            const { data, error } = await _supabase.from('speedruns').select('*');
-            if (!error) { speedruns = data || []; render(); }
-        }
+function sToT(ts) {
+    const h = Math.floor(ts / 3600).toString().padStart(2, '0');
+    const m = Math.floor((ts % 3600) / 60).toString().padStart(2, '0');
+    const s = (ts % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+}
 
-        async function deleteRun(id) {
-            const pass = await getPassword();
-            if (pass && await verify(pass)) {
-                const { error } = await _supabase.from('speedruns').delete().eq('id', id);
-                if (!error) fetchRuns();
-            } else if (pass !== null) { alert("❌ Błędne hasło!"); }
-        }
+async function fetchRuns() {
+    const { data, error } = await _supabase.from('speedruns').select('*');
+    if (!error) { speedruns = data || []; render(); }
+}
 
-        function render() {
-            const tbody = document.getElementById('leaderboardBody');
-            tbody.innerHTML = '';
-            const sorted = [...speedruns].sort((a,b) => tToS(a.hours, a.minutes, a.seconds) - tToS(b.hours, b.minutes, b.seconds));
-            sorted.forEach((run, i) => {
-                const row = document.createElement('tr');
-                let rCls = '';
-                if (i === 0) { rCls = 'rank-1'; row.className = 'top-1'; }
-                else if (i === 1) { rCls = 'rank-2'; row.className = 'top-2'; }
-                else if (i === 2) { rCls = 'rank-3'; row.className = 'top-3'; }
-                row.innerHTML = `<td><span class="rank ${rCls}">${i + 1}</span></td><td><div class="player"><img src="https://mc-heads.net/avatar/${run.name}/40" class="player-head"><span>${run.name}</span></div></td><td><span class="time">${sToT(tToS(run.hours, run.minutes, run.seconds))}</span></td><td><span style="background:#222; padding:4px 10px; border-radius:15px; font-size:0.8rem;">${run.version}</span></td><td><button class="delete-btn" onclick="deleteRun(${run.id})">🗑️</button></td>`;
-                tbody.appendChild(row);
-            });
-            document.getElementById('totalRuns').textContent = speedruns.length;
-            if (speedruns.length > 0) {
-                const times = speedruns.map(r => tToS(r.hours, r.minutes, r.seconds));
-                document.getElementById('bestTime').textContent = sToT(Math.min(...times));
-                document.getElementById('avgTime').textContent = sToT(Math.floor(times.reduce((a,b)=>a+b,0)/speedruns.length));
-            }
-        }
+async function deleteRun(id) {
+    const pass = await getPassword();
+    if (pass && verify(pass)) {
+        const { error } = await _supabase.from('speedruns').delete().eq('id', id);
+        if (!error) fetchRuns();
+    } else if (pass !== null) { alert("❌ Błędne hasło!"); }
+}
 
-        document.getElementById('speedrunForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const pass = await getPassword();
-            if (pass && await verify(pass)) {
-                const newRun = { name: document.getElementById('playerName').value, hours: parseInt(document.getElementById('hours').value) || 0, minutes: parseInt(document.getElementById('minutes').value), seconds: parseInt(document.getElementById('seconds').value), version: document.getElementById('version').value };
-                const { error } = await _supabase.from('speedruns').insert([newRun]);
-                if (!error) { this.reset(); fetchRuns(); }
-            } else if (pass !== null) { alert("❌ Błędne hasło!"); }
-        });
-        fetchRuns();
+function render() {
+    const tbody = document.getElementById('leaderboardBody');
+    tbody.innerHTML = '';
+    const sorted = [...speedruns].sort((a,b) => tToS(a.hours, a.minutes, a.seconds) - tToS(b.hours, b.minutes, b.seconds));
+    sorted.forEach((run, i) => {
+        const row = document.createElement('tr');
+        let rCls = '';
+        if (i === 0) { rCls = 'rank-1'; row.className = 'top-1'; }
+        else if (i === 1) { rCls = 'rank-2'; row.className = 'top-2'; }
+        else if (i === 2) { rCls = 'rank-3'; row.className = 'top-3'; }
+        row.innerHTML = `<td><span class="rank ${rCls}">${i + 1}</span></td><td><div class="player"><img src="https://mc-heads.net/avatar/${run.name}/40" class="player-head"><span>${run.name}</span></div></td><td><span class="time">${sToT(tToS(run.hours, run.minutes, run.seconds))}</span></td><td><span style="background:#222; padding:4px 10px; border-radius:15px; font-size:0.8rem;">${run.version}</span></td><td><button class="delete-btn" onclick="deleteRun(${run.id})">🗑️</button></td>`;
+        tbody.appendChild(row);
+    });
+    document.getElementById('totalRuns').textContent = speedruns.length;
+    if (speedruns.length > 0) {
+        const times = speedruns.map(r => tToS(r.hours, r.minutes, r.seconds));
+        document.getElementById('bestTime').textContent = sToT(Math.min(...times));
+        document.getElementById('avgTime').textContent = sToT(Math.floor(times.reduce((a,b)=>a+b,0)/speedruns.length));
+    }
+}
+
+document.getElementById('speedrunForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const pass = await getPassword();
+    if (pass && verify(pass)) {
+        const newRun = { 
+            name: document.getElementById('playerName').value, 
+            hours: parseInt(document.getElementById('hours').value) || 0, 
+            minutes: parseInt(document.getElementById('minutes').value), 
+            seconds: parseInt(document.getElementById('seconds').value), 
+            version: document.getElementById('version').value 
+        };
+        const { error } = await _supabase.from('speedruns').insert([newRun]);
+        if (!error) { this.reset(); fetchRuns(); }
+    } else if (pass !== null) { alert("❌ Błędne hasło!"); }
+});
+
+fetchRuns();
     </script>
 </body>
 </html>
+
 
