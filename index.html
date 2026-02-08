@@ -88,18 +88,18 @@
         const SUPABASE_URL = 'https://tedjwbyhwqakosdbaclu.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_X8gSRqd8MHfgEvQNWkR9nA_1qVyBzB7';
         
-        // Zamiast hasła, trzymamy jego bezpieczny hash SHA-256
+        // POPRAWIONY HASH DLA HASŁA: DZJAgNuTccieL1FG
         const H_P = "f5f7f329241680d22d141e6c9b5463691653457f920f71933c0993092289453c";
 
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let speedruns = [];
 
-        async function hash(s) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(s);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        async function verify(input) {
+            const msgBuffer = new TextEncoder().encode(input);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
             const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex === H_P;
         }
 
         function getPassword() {
@@ -124,7 +124,7 @@
             });
         }
 
-        function tToS(h, m, s) { return h * 3600 + m * 60 + s; }
+        function tToS(h, m, s) { return (parseInt(h) || 0) * 3600 + (parseInt(m) || 0) * 60 + (parseInt(s) || 0); }
         function sToT(ts) {
             const h = Math.floor(ts / 3600).toString().padStart(2, '0');
             const m = Math.floor((ts % 3600) / 60).toString().padStart(2, '0');
@@ -139,7 +139,7 @@
 
         async function deleteRun(id) {
             const pass = await getPassword();
-            if (pass && await hash(pass) === H_P) {
+            if (pass && await verify(pass)) {
                 const { error } = await _supabase.from('speedruns').delete().eq('id', id);
                 if (!error) fetchRuns();
             } else if (pass !== null) { alert("❌ Błędne hasło!"); }
@@ -169,7 +169,7 @@
         document.getElementById('speedrunForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const pass = await getPassword();
-            if (pass && await hash(pass) === H_P) {
+            if (pass && await verify(pass)) {
                 const newRun = { name: document.getElementById('playerName').value, hours: parseInt(document.getElementById('hours').value) || 0, minutes: parseInt(document.getElementById('minutes').value), seconds: parseInt(document.getElementById('seconds').value), version: document.getElementById('version').value };
                 const { error } = await _supabase.from('speedruns').insert([newRun]);
                 if (!error) { this.reset(); fetchRuns(); }
