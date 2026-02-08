@@ -61,8 +61,8 @@
 
         /* FORMULARZ I STATY */
         .form-section { background: rgba(0, 0, 0, 0.8); border-radius: 15px; padding: 30px; border: 1px solid #00ff88; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        input, select { padding: 12px; background: #000; border: 2px solid #333; color: #00ff88; border-radius: 8px; font-family: 'Orbitron'; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        input, select { padding: 12px; background: #000; border: 2px solid #333; color: #00ff88; border-radius: 8px; font-family: 'Orbitron'; width: 100%; }
         .submit-btn { width: 100%; padding: 15px; background: #00ff88; color: #000; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; text-transform: uppercase; }
         
         .delete-btn { background: none; border: none; color: #ff4444; cursor: pointer; font-size: 1.2rem; opacity: 0.5; transition: 0.2s; }
@@ -126,7 +126,7 @@
             <form id="speedrunForm">
                 <div class="form-grid">
                     <input type="text" id="playerName" placeholder="Nick gracza" required>
-                    <input type="number" id="hours" value="0" min="0" placeholder="H">
+                    <input type="number" id="hours" placeholder="H" min="0">
                     <input type="number" id="minutes" placeholder="Min" min="0" max="59" required>
                     <input type="number" id="seconds" placeholder="Sek" min="0" max="59" required>
                     <select id="version" required>
@@ -160,7 +160,6 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let speedruns = [];
 
-        // Funkcja obsługująca Modal zamiast Prompt
         function getPassword() {
             return new Promise((resolve) => {
                 const modal = document.getElementById('passwordModal');
@@ -246,6 +245,7 @@
             if (pass === ADMIN_PASSWORD) {
                 const newRun = {
                     name: document.getElementById('playerName').value,
+                    // Zamiana na 0 jeśli pole H pozostanie puste
                     hours: parseInt(document.getElementById('hours').value) || 0,
                     minutes: parseInt(document.getElementById('minutes').value),
                     seconds: parseInt(document.getElementById('seconds').value),
