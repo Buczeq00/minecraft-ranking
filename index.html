@@ -212,34 +212,43 @@
 
        function render() {
             const tbody = document.getElementById('leaderboardBody');
+            if (!tbody) return; // Zabezpieczenie przed błędem, jeśli tabela nie istnieje
+            
             tbody.innerHTML = '';
             const bests = {};
+            
+            // Logika grupowania najlepszych wyników
             speedruns.forEach(r => {
                 const total = toMs(r.hours, r.minutes, r.seconds, r.ms);
                 if(!bests[r.name] || total < bests[r.name].total) bests[r.name] = {...r, total};
             });
+            
             const sorted = Object.values(bests).sort((a,b) => a.total - b.total);
 
+            // Sekcja HERO (World Record)
             if(sorted.length > 0) {
                 const wr = sorted[0];
-                document.getElementById('heroBox').style.display = 'flex';
-                document.getElementById('hNameTag').textContent = wr.name;
-                document.getElementById('hSkin').src = `https://mc-heads.net/body/${wr.name}`;
-                document.getElementById('hVer').textContent = `Minecraft ${wr.version}`;
-                document.getElementById('hSeed').textContent = wr.seed ? `SEED: ${wr.seed}` : 'SEED: BRAK';
-                
-                if(wr.total !== wrTimeMs) {
-                    wrTimeMs = wr.total;
-                    animateTime(wr.total);
+                const heroBox = document.getElementById('heroBox');
+                if (heroBox) {
+                    heroBox.style.display = 'flex';
+                    document.getElementById('hNameTag').textContent = wr.name;
+                    document.getElementById('hSkin').src = `https://mc-heads.net/body/${wr.name}`;
+                    document.getElementById('hVer').textContent = `Minecraft ${wr.version}`;
+                    document.getElementById('hSeed').textContent = wr.seed ? `SEED: ${wr.seed}` : 'SEED: BRAK';
+                    
+                    if(wr.total !== wrTimeMs) {
+                        wrTimeMs = wr.total;
+                        animateTime(wr.total);
+                    }
                 }
             }
 
+            // Generowanie wierszy tabeli z dodanym SEEDEM
             sorted.forEach((run, i) => {
                 const row = document.createElement('tr');
                 let nCls = i === 0 ? 'nick-1' : '';
                 if(i < 3) row.classList.add(`top-${i+1}`);
                 
-                // Poprawiona komórka z czasem i seedem
                 row.innerHTML = `
                     <td><b>${i+1}</b></td>
                     <td>
@@ -248,8 +257,8 @@
                         <span style="cursor:pointer;opacity:0.4;margin-left:5px;" onclick="showHistory('${run.name}')">ⓘ</span>
                     </td>
                     <td>
-                        <div style="font-family:'VT323',monospace; font-size:1.3rem; line-height:1.1;">${fmt(run.total)}</div>
-                        <div style="font-size:0.65rem; opacity:0.4; margin-top:2px; font-family:'Orbitron'; letter-spacing:1px;">
+                        <div style="font-family:'VT323',monospace; font-size:1.2rem; line-height:1.1;">${fmt(run.total)}</div>
+                        <div style="font-size:0.6rem; opacity:0.4; margin-top:2px; font-family:'Orbitron'; letter-spacing:1px; color: var(--primary);">
                             ${run.seed ? run.seed : 'brak seeda'}
                         </div>
                     </td>
@@ -260,6 +269,8 @@
                     </td>
                 `;
                 tbody.appendChild(row);
+            });
+        }
             });
         }
             });
@@ -348,4 +359,5 @@
     </script>
 </body>
 </html>
+
 
