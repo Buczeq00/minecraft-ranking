@@ -64,7 +64,6 @@
         
         tbody tr:hover { background: var(--row-hover); }
 
-        /* PODŚWIETLENIA TOP 3 */
         tr.top-1 { border-left: 5px solid #ffd700; background: linear-gradient(90deg, rgba(255,215,0,0.1), transparent); }
         tr.top-2 { border-left: 5px solid #c0c0c0; background: linear-gradient(90deg, rgba(192,192,192,0.07), transparent); }
         tr.top-3 { border-left: 5px solid #cd7f32; background: linear-gradient(90deg, rgba(205,127,50,0.05), transparent); }
@@ -73,8 +72,7 @@
         @keyframes shine { to { background-position: 200% center; } }
 
         .player-head { width: 32px; height: 32px; border-radius: 4px; vertical-align: middle; margin-right: 12px; border: 1px solid var(--primary); transition: 0.2s; }
-        tr:hover .player-head { transform: scale(1.3) rotate(5deg); box-shadow: 0 0 10px var(--primary); }
-
+        
         .record-hero {
             background: rgba(0,0,0,0.85); border: 2px solid #ffd700; border-radius: 20px;
             padding: 40px 20px; position: sticky; top: 20px;
@@ -91,15 +89,20 @@
         }
         .hero-time { font-family: 'VT323', monospace; font-size: 4rem; color: #ffd700; margin-top: 15px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); line-height: 1; }
         
-        .glow-bar-subtle { height: 3px; width: 80%; background: #ffd700; margin-top: 25px; animation: gentle-glow 3s infinite; }
-        @keyframes gentle-glow { 0%, 100% { opacity: 0.3; transform: scaleX(0.9); } 50% { opacity: 1; box-shadow: 0 0 15px #ffd700; transform: scaleX(1); } }
-
         .form-card { background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; border: 1px solid var(--primary); margin-top: 30px; }
         .submit-btn { width: 100%; padding: 16px; background: var(--primary); color: #000; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
         input, select { padding: 12px; background: #000; border: 1px solid #333; color: var(--primary); border-radius: 8px; width: 100%; font-family: 'Orbitron'; outline: none; margin-bottom: 10px; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); backdrop-filter: blur(10px); z-index: 9999; justify-content: center; align-items: center; }
         .modal-content { background: #111; padding: 40px; border: 2px solid var(--primary); border-radius: 20px; width: 90%; max-width: 550px; }
+
+        /* STYL KARTY DO POBRANIA (UKRYTA) */
+        #shareCard { 
+            position: absolute; left: -9999px; 
+            width: 800px; height: 450px; 
+            background: #0a0a0a; border: 8px solid var(--primary); 
+            display: flex; align-items: center; padding: 50px; color: #fff; font-family: 'Orbitron'; 
+        }
     </style>
 </head>
 <body>
@@ -150,9 +153,18 @@
                 <div class="hero-time" id="hTime">00:00:00.000</div>
                 <div id="hVer" style="opacity: 0.5; font-size: 0.8rem; margin-top: 10px;">Minecraft 1.16.1</div>
                 <div id="hSeed" style="font-size: 0.6rem; opacity: 0.3; margin-top: 10px;">SEED: ---</div>
-                <div class="glow-bar-subtle"></div>
             </div>
         </div>
+    </div>
+
+    <div id="shareCard">
+        <div style="flex: 1;">
+            <h1 id="scRank" style="font-size: 4rem; color: var(--primary); margin-bottom: 10px;">#1</h1>
+            <h2 id="scName" style="font-size: 2.5rem; margin-bottom: 20px;">PLAYER</h2>
+            <div id="scTime" style="font-size: 3.5rem; font-family: 'VT323'; color: #ffd700;">00:00:00.000</div>
+            <div id="scVer" style="font-size: 1.2rem; opacity: 0.6; margin-top: 20px;">Minecraft 1.16.1</div>
+        </div>
+        <img id="scImg" src="" style="height: 350px; filter: drop-shadow(0 0 20px var(--primary));">
     </div>
 
     <div id="passwordModal" class="modal"><div class="modal-content"><h3>🔒 Admin Pass</h3><input type="password" id="passInput" style="margin:20px 0; text-align:center; font-size: 2rem;"><button id="confirmPass" class="submit-btn">OK</button></div></div>
@@ -188,7 +200,6 @@
         function render() {
             const tbody = document.getElementById('leaderboardBody');
             if(!tbody) return; tbody.innerHTML = '';
-            
             const bests = {};
             speedruns.forEach(r => {
                 const t = toMs(r.hours, r.minutes, r.seconds, r.ms);
@@ -208,7 +219,7 @@
 
             sorted.forEach((run, i) => {
                 const row = document.createElement('tr');
-                if(i < 3) row.classList.add(`top-${i+1}`); // Klasy top-1, top-2, top-3
+                if(i < 3) row.classList.add(`top-${i+1}`);
                 row.innerHTML = `
                     <td><b>${i+1}</b></td>
                     <td>
@@ -228,6 +239,28 @@
                 `;
                 tbody.appendChild(row);
             });
+        }
+
+        async function downloadCard(name, time, rank, ver) {
+            // Wypełnienie ukrytej karty danymi
+            document.getElementById('scName').textContent = name;
+            document.getElementById('scTime').textContent = time;
+            document.getElementById('scRank').textContent = `#${rank}`;
+            document.getElementById('scVer').textContent = ver;
+            document.getElementById('scImg').src = `https://mc-heads.net/body/${name}`;
+
+            // Czekamy moment na załadowanie skina i generujemy obraz
+            setTimeout(async () => {
+                const canv = await html2canvas(document.getElementById('shareCard'), { 
+                    backgroundColor: '#0a0a0a',
+                    useCORS: true,
+                    scale: 2 // Lepsza jakość
+                });
+                const link = document.createElement('a');
+                link.download = `Rekord_${name}.png`;
+                link.href = canv.toDataURL('image/png');
+                link.click();
+            }, 500);
         }
 
         async function getPass() {
@@ -266,7 +299,6 @@
             document.getElementById('historyModal').style.display = 'flex';
         }
 
-        // CZĄSTECZKI - MOCNIEJSZE
         const canvas = document.getElementById('bg-stars'); const ctx = canvas.getContext('2d');
         let dots = [];
         function initDots() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; dots = []; for(let i=0; i<100; i++) dots.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, s:Math.random()*2.5+0.5, v:Math.random()*0.5+0.2}); }
