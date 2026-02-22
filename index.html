@@ -52,10 +52,11 @@
 
         .theme-switcher { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; }
         .theme-btn { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; transition: 0.3s; }
+        .theme-btn:hover { transform: scale(1.1); }
 
         /* LAYOUT MAIN */
-        .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 30px; }
-        @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr; } }
+        .main-grid { display: grid; grid-template-columns: 1fr 400px; gap: 30px; align-items: start; }
+        @media (max-width: 1150px) { .main-grid { grid-template-columns: 1fr; } }
 
         /* LEADERBOARD TABLE */
         .leaderboard-card { background: rgba(0, 0, 0, 0.85); border-radius: 15px; padding: 30px; border: 1px solid var(--primary); overflow-x: auto; backdrop-filter: blur(10px); }
@@ -66,36 +67,24 @@
         .nick-1 { background: linear-gradient(90deg, #fff, #ffd700, #fff); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; animation: shine 3s linear infinite; }
         @keyframes shine { to { background-position: 200% center; } }
 
-        /* HERO SECTION (PO PRAWEJ) */
-       .record-hero {
-    background: rgba(0,0,0,0.85); 
-    border: 2px solid #ffd700; 
-    border-radius: 20px;
-    padding: 40px 20px; 
-    text-align: center; 
-    position: sticky; 
-    top: 20px;
-    box-shadow: 0 0 40px rgba(255, 215, 0, 0.2); 
-    height: fit-content;
-    
-    /* Flexbox do centrowania zawartości */
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
-    justify-content: center;
+        /* HERO SECTION (WYŚRODKOWANY) */
+        .record-hero {
+            background: rgba(0,0,0,0.85); border: 2px solid #ffd700; border-radius: 20px;
+            padding: 40px 20px; position: sticky; top: 20px;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.2); height: fit-content;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
         }
-        .hero-skin { 
-    height: 380px; 
-    filter: drop-shadow(0 0 20px var(--primary)); 
-    margin: 25px 0;
+        .hero-skin { height: 380px; filter: drop-shadow(0 0 20px var(--primary)); margin: 25px 0; animation: levitation 4s infinite ease-in-out; }
+        @keyframes levitation { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
         .hero-name-tag {
             background: rgba(0,0,0,0.8); border: 2px solid #fff; padding: 6px 20px;
             display: inline-block; font-weight: bold; color: #fff; border-radius: 4px;
-            position: relative; z-index: 5; box-shadow: 0 4px 0 #333;
+            position: relative; z-index: 5; box-shadow: 0 4px 0 #333; font-size: 1.1rem;
         }
-        .hero-time { font-size: 2.5rem; font-weight: 900; color: #ffd700; margin-top: 15px; }
-        .glow-bar-subtle { height: 3px; width: 100%; background: #ffd700; margin-top: 20px; animation: gentle-glow 3s infinite; }
-        @keyframes gentle-glow { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; box-shadow: 0 0 15px #ffd700; } }
+        .hero-time { font-size: 2.5rem; font-weight: 900; color: #ffd700; margin-top: 15px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+        .glow-bar-subtle { height: 3px; width: 80%; background: #ffd700; margin-top: 25px; animation: gentle-glow 3s infinite; }
+        @keyframes gentle-glow { 0%, 100% { opacity: 0.3; transform: scaleX(0.9); } 50% { opacity: 1; box-shadow: 0 0 15px #ffd700; transform: scaleX(1); } }
 
         /* FORMULARZ */
         .form-card { background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; border: 1px solid var(--primary); margin-top: 30px; }
@@ -110,10 +99,10 @@
         .modal-content { background: #111; padding: 40px; border: 2px solid var(--primary); border-radius: 20px; width: 90%; max-width: 550px; }
         .history-item { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
 
+        .player-head { width: 32px; height: 32px; border-radius: 4px; vertical-align: middle; margin-right: 12px; border: 1px solid var(--primary); }
+        
         /* SHARE CARD HIDDEN */
         #shareCard { position: absolute; left: -9999px; width: 800px; height: 450px; background: #0a0a0a; border: 8px solid var(--primary); display: flex; align-items: center; padding: 50px; color: #fff; font-family: 'Orbitron'; }
-
-        .player-head { width: 32px; height: 32px; border-radius: 4px; vertical-align: middle; margin-right: 12px; border: 1px solid var(--primary); }
     </style>
 </head>
 <body>
@@ -139,7 +128,7 @@
                 </div>
 
                 <div class="form-card">
-                    <h3 style="margin-bottom: 20px; font-size: 1rem; color: #fff;">📝 DODAJ NOWY REKORD</h3>
+                    <h3 style="margin-bottom: 20px; font-size: 1rem; color: #fff; letter-spacing: 1px;">📝 DODAJ NOWY REKORD</h3>
                     <form id="speedrunForm">
                         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 15px;">
                             <input type="text" id="playerName" placeholder="NICK" required>
@@ -161,16 +150,14 @@
             </div>
 
             <div id="heroBox" class="record-hero" style="display: none;">
-    <p style="letter-spacing: 4px; font-size: 0.7rem; color: #ffd700; font-weight: 900; margin-bottom: 20px;">WORLD RECORD HOLDER</p>
-    
-    <div id="hNameTag" class="hero-name-tag">---</div>
-    <img id="hSkin" class="hero-skin" src="" alt="Skin">
-    
-    <div class="hero-time" id="hTime">00:00:00.000</div>
-    <div id="hVer" style="opacity: 0.5; font-size: 0.8rem; margin-top: 10px;">Minecraft 1.16.1</div>
-    <div id="hSeed" style="font-size: 0.6rem; opacity: 0.3; margin-top: 10px; word-break: break-all;">SEED: ---</div>
-    <div class="glow-bar-subtle"></div>
-</div>
+                <p style="letter-spacing: 4px; font-size: 0.7rem; color: #ffd700; font-weight: 900; margin-bottom: 10px;">WORLD RECORD HOLDER</p>
+                <div id="hNameTag" class="hero-name-tag">---</div>
+                <img id="hSkin" class="hero-skin" src="" alt="Skin">
+                <div class="hero-time" id="hTime">00:00:00.000</div>
+                <div id="hVer" style="opacity: 0.5; font-size: 0.8rem; margin-top: 10px;">Minecraft 1.16.1</div>
+                <div id="hSeed" style="font-size: 0.6rem; opacity: 0.3; margin-top: 10px; word-break: break-all; max-width: 80%;">SEED: ---</div>
+                <div class="glow-bar-subtle"></div>
+            </div>
         </div>
     </div>
 
@@ -194,13 +181,11 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let speedruns = [];
 
-        // DŹWIĘKI
         const sndClick = new Audio('https://www.soundjay.com/buttons/sounds/button-16.mp3'); 
         const sndExp = new Audio('https://rpg.hamsterrepublic.com/wiki-images/2/21/Level_Up.mp3');
         function playClick() { sndClick.currentTime = 0; sndClick.play().catch(()=>{}); }
         function playExp() { sndExp.currentTime = 0; sndExp.volume = 0.5; sndExp.play().catch(()=>{}); }
 
-        // MOTYWY
         function setTheme(theme) { 
             playClick();
             document.body.className = theme === 'cyber' ? '' : 'theme-' + theme; 
@@ -208,7 +193,6 @@
         }
         if(localStorage.getItem('leaderboard-theme')) setTheme(localStorage.getItem('leaderboard-theme'));
 
-        // CZAS I FORMATOWANIE
         const toMs = (h, m, s, ms) => ((h||0)*3600000) + ((m||0)*60000) + ((s||0)*1000) + (ms||0);
         const fmt = (t) => {
             const h = Math.floor(t/3600000).toString().padStart(2,'0');
@@ -218,7 +202,6 @@
             return `${h}:${m}:${s}.${ms}`;
         };
 
-        // PARTICLES
         const canvas = document.getElementById('bg-stars');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -229,14 +212,12 @@
         function anim() { ctx.clearRect(0,0,canvas.width, canvas.height); particles.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(anim); }
         anim();
 
-        // POBIERANIE DANYCH
         async function fetchAll() {
             const { data } = await _supabase.from('speedruns').select('*').order('created_at', { ascending: true });
             speedruns = data || [];
             render();
         }
 
-        // RENDEROWANIE
         function render() {
             const tbody = document.getElementById('leaderboardBody');
             tbody.innerHTML = '';
@@ -247,10 +228,9 @@
             });
             const sorted = Object.values(bests).sort((a,b) => a.total - b.total);
 
-            // HERO SECTION (REKORD ŚWIATA)
             if(sorted.length > 0) {
                 const wr = sorted[0];
-                document.getElementById('heroBox').style.display = 'block';
+                document.getElementById('heroBox').style.display = 'flex';
                 document.getElementById('hNameTag').textContent = wr.name;
                 document.getElementById('hSkin').src = `https://mc-heads.net/body/${wr.name}`;
                 document.getElementById('hTime').textContent = fmt(wr.total);
@@ -262,7 +242,6 @@
                 const row = document.createElement('tr');
                 let nCls = i === 0 ? 'nick-1' : '';
                 if(i < 3) row.classList.add(`top-${i+1}`);
-                
                 row.innerHTML = `
                     <td><b style="color:var(--primary)">${i+1}</b></td>
                     <td><img src="https://mc-heads.net/avatar/${run.name}/32" class="player-head"><span class="${nCls}">${run.name}</span> <span style="cursor:pointer;opacity:0.5;" onclick="showHistory('${run.name}')">ⓘ</span></td>
@@ -277,7 +256,6 @@
             });
         }
 
-        // FUNKCJE MODALI I AKCJI
         async function getPass() {
             const modal = document.getElementById('passwordModal');
             modal.style.display = 'flex';
@@ -348,5 +326,3 @@
     </script>
 </body>
 </html>
-
-
