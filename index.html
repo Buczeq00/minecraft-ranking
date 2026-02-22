@@ -40,7 +40,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: var(--bg-gradient); color: var(--primary); font-family: 'Orbitron', monospace; min-height: 100vh; padding: 20px; transition: 0.5s; overflow-x: hidden; position: relative; }
         
-        /* OVERLAY / WINIETA */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: var(--overlay); opacity: 0.15; z-index: -1; pointer-events: none;
@@ -61,18 +60,21 @@
 
         .leaderboard-card { background: rgba(0, 0, 0, 0.85); border-radius: 15px; padding: 30px; border: 1px solid var(--primary); overflow-x: auto; backdrop-filter: blur(10px); }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; transition: background 0.2s; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; transition: 0.2s; }
         
         tbody tr:hover { background: var(--row-hover); }
-        tr.top-1 { border-left: 5px solid #ffd700; background: linear-gradient(90deg, rgba(255,215,0,0.05), transparent); }
+
+        /* PODŚWIETLENIA TOP 3 */
+        tr.top-1 { border-left: 5px solid #ffd700; background: linear-gradient(90deg, rgba(255,215,0,0.1), transparent); }
+        tr.top-2 { border-left: 5px solid #c0c0c0; background: linear-gradient(90deg, rgba(192,192,192,0.07), transparent); }
+        tr.top-3 { border-left: 5px solid #cd7f32; background: linear-gradient(90deg, rgba(205,127,50,0.05), transparent); }
         
         .nick-1 { background: linear-gradient(90deg, #fff, #ffd700, #fff); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; animation: shine 3s linear infinite; }
         @keyframes shine { to { background-position: 200% center; } }
 
-        .player-head { width: 32px; height: 32px; border-radius: 4px; vertical-align: middle; margin-right: 12px; border: 1px solid var(--primary); transition: transform 0.2s ease-out; }
+        .player-head { width: 32px; height: 32px; border-radius: 4px; vertical-align: middle; margin-right: 12px; border: 1px solid var(--primary); transition: 0.2s; }
         tr:hover .player-head { transform: scale(1.3) rotate(5deg); box-shadow: 0 0 10px var(--primary); }
 
-        /* HERO SECTION */
         .record-hero {
             background: rgba(0,0,0,0.85); border: 2px solid #ffd700; border-radius: 20px;
             padding: 40px 20px; position: sticky; top: 20px;
@@ -94,14 +96,10 @@
 
         .form-card { background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; border: 1px solid var(--primary); margin-top: 30px; }
         .submit-btn { width: 100%; padding: 16px; background: var(--primary); color: #000; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
-        .submit-btn:hover { box-shadow: 0 0 20px var(--primary); transform: translateY(-2px); }
-        
         input, select { padding: 12px; background: #000; border: 1px solid #333; color: var(--primary); border-radius: 8px; width: 100%; font-family: 'Orbitron'; outline: none; margin-bottom: 10px; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); backdrop-filter: blur(10px); z-index: 9999; justify-content: center; align-items: center; }
         .modal-content { background: #111; padding: 40px; border: 2px solid var(--primary); border-radius: 20px; width: 90%; max-width: 550px; }
-        
-        #shareCard { position: absolute; left: -9999px; width: 800px; height: 450px; background: #0a0a0a; border: 8px solid var(--primary); display: flex; align-items: center; padding: 50px; color: #fff; font-family: 'Orbitron'; }
     </style>
 </head>
 <body>
@@ -151,21 +149,14 @@
                 <img id="hSkin" class="hero-skin" src="" alt="Skin">
                 <div class="hero-time" id="hTime">00:00:00.000</div>
                 <div id="hVer" style="opacity: 0.5; font-size: 0.8rem; margin-top: 10px;">Minecraft 1.16.1</div>
-                <div id="hSeed" style="font-size: 0.6rem; opacity: 0.3; margin-top: 10px; word-break: break-all; max-width: 80%;">SEED: ---</div>
+                <div id="hSeed" style="font-size: 0.6rem; opacity: 0.3; margin-top: 10px;">SEED: ---</div>
                 <div class="glow-bar-subtle"></div>
             </div>
         </div>
     </div>
 
     <div id="passwordModal" class="modal"><div class="modal-content"><h3>🔒 Admin Pass</h3><input type="password" id="passInput" style="margin:20px 0; text-align:center; font-size: 2rem;"><button id="confirmPass" class="submit-btn">OK</button></div></div>
-    
-    <div id="historyModal" class="modal"><div class="modal-content">
-        <div style="display:flex; justify-content:space-between;">
-            <h3 id="histTitle">Historia</h3>
-            <button onclick="document.getElementById('historyModal').style.display='none'" style="color:red; background:none; border:none; cursor:pointer; font-size:1.5rem;">&times;</button>
-        </div>
-        <ul id="historyList" style="list-style:none; margin-top:20px; max-height:300px; overflow-y:auto;"></ul>
-    </div></div>
+    <div id="historyModal" class="modal"><div class="modal-content"><h3 id="histTitle">Historia</h3><ul id="historyList" style="list-style:none; margin-top:20px; max-height:300px; overflow-y:auto;"></ul><button onclick="document.getElementById('historyModal').style.display='none'" class="submit-btn" style="margin-top:20px;">ZAMKNIJ</button></div></div>
 
     <script>
         const SUPABASE_URL = 'https://tedjwbyhwqakosdbaclu.supabase.co';
@@ -174,56 +165,34 @@
         let speedruns = [];
         let wrTimeMs = 0;
 
-        // Dźwięki
-        const sndClick = new Audio('https://www.soundjay.com/buttons/sounds/button-16.mp3'); 
-        const sndExp = new Audio('https://rpg.hamsterrepublic.com/wiki-images/2/21/Level_Up.mp3');
-        function playClick() { sndClick.currentTime = 0; sndClick.play().catch(()=>{}); }
-        function playExp() { sndExp.currentTime = 0; sndExp.volume = 0.5; sndExp.play().catch(()=>{}); }
-
-        function setTheme(theme) { 
-            playClick();
-            document.body.className = theme === 'cyber' ? '' : 'theme-' + theme; 
-            localStorage.setItem('leaderboard-theme', theme); 
-        }
+        function setTheme(t) { document.body.className = t==='cyber'?'':'theme-'+t; localStorage.setItem('leaderboard-theme', t); }
         if(localStorage.getItem('leaderboard-theme')) setTheme(localStorage.getItem('leaderboard-theme'));
 
-        // Pomocnicze
-        const toMs = (h, m, s, ms) => ((h||0)*3600000) + ((m||0)*60000) + ((s||0)*1000) + (ms||0);
+        const toMs = (h,m,s,ms) => ((h||0)*3600000)+((m||0)*60000)+((s||0)*1000)+(ms||0);
         const fmt = (t) => {
-            const h = Math.floor(t/3600000).toString().padStart(2,'0');
-            const m = Math.floor((t%3600000)/60000).toString().padStart(2,'0');
-            const s = Math.floor((t%60000)/1000).toString().padStart(2,'0');
-            const ms = (t%1000).toString().padStart(3,'0');
+            const h=Math.floor(t/3600000).toString().padStart(2,'0'), m=Math.floor((t%3600000)/60000).toString().padStart(2,'0'), s=Math.floor((t%60000)/1000).toString().padStart(2,'0'), ms=(t%1000).toString().padStart(3,'0');
             return `${h}:${m}:${s}.${ms}`;
         };
 
-        function animateTime(targetMs) {
-            const display = document.getElementById('hTime');
-            let current = 0;
-            const step = targetMs / 40;
-            const interval = setInterval(() => {
-                current += step;
-                if (current >= targetMs) { display.textContent = fmt(targetMs); clearInterval(interval); }
-                else { display.textContent = fmt(Math.floor(current)); }
-            }, 20);
+        function animateTime(target) {
+            const d = document.getElementById('hTime'); let c = 0; const step = target/40;
+            const inv = setInterval(() => { c+=step; if(c>=target){d.textContent=fmt(target); clearInterval(inv);} else d.textContent=fmt(Math.floor(c)); }, 20);
         }
 
         async function fetchAll() {
-            const { data, error } = await _supabase.from('speedruns').select('*').order('created_at', { ascending: true });
-            if(error) console.error(error);
+            const { data } = await _supabase.from('speedruns').select('*').order('created_at', { ascending: true });
             speedruns = data || [];
             render();
         }
 
         function render() {
             const tbody = document.getElementById('leaderboardBody');
-            if(!tbody) return;
-            tbody.innerHTML = '';
+            if(!tbody) return; tbody.innerHTML = '';
             
             const bests = {};
             speedruns.forEach(r => {
-                const total = toMs(r.hours, r.minutes, r.seconds, r.ms);
-                if(!bests[r.name] || total < bests[r.name].total) bests[r.name] = {...r, total};
+                const t = toMs(r.hours, r.minutes, r.seconds, r.ms);
+                if(!bests[r.name] || t < bests[r.name].total) bests[r.name] = {...r, total:t};
             });
             const sorted = Object.values(bests).sort((a,b) => a.total - b.total);
 
@@ -239,7 +208,7 @@
 
             sorted.forEach((run, i) => {
                 const row = document.createElement('tr');
-                if(i < 3) row.classList.add(`top-${i+1}`);
+                if(i < 3) row.classList.add(`top-${i+1}`); // Klasy top-1, top-2, top-3
                 row.innerHTML = `
                     <td><b>${i+1}</b></td>
                     <td>
@@ -249,9 +218,7 @@
                     </td>
                     <td>
                         <div style="font-family:'VT323',monospace; font-size:1.2rem; line-height:1.1;">${fmt(run.total)}</div>
-                        <div style="font-size:0.6rem; opacity:0.4; margin-top:2px; font-family:'Orbitron'; letter-spacing:1px;">
-                            ${run.seed ? run.seed : 'brak seeda'}
-                        </div>
+                        <div style="font-size:0.6rem; opacity:0.4; margin-top:2px;">${run.seed || 'brak seeda'}</div>
                     </td>
                     <td>${run.version}</td>
                     <td>
@@ -264,45 +231,28 @@
         }
 
         async function getPass() {
-            const modal = document.getElementById('passwordModal');
-            modal.style.display = 'flex';
-            const pass = await new Promise(res => {
+            const m = document.getElementById('passwordModal'); m.style.display = 'flex';
+            const p = await new Promise(res => {
                 document.getElementById('confirmPass').onclick = () => {
-                    modal.style.display = 'none';
-                    res(document.getElementById('passInput').value);
-                    document.getElementById('passInput').value = '';
+                    m.style.display = 'none'; const val = document.getElementById('passInput').value;
+                    document.getElementById('passInput').value = ''; res(val);
                 };
             });
-            // Uwaga: Tutaj musi być Twój endpoint do weryfikacji hasła
-            const r = await fetch('/api/check-password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass})});
-            const auth = await r.json();
-            return auth.success;
+            const r = await fetch('/api/check-password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:p})});
+            const auth = await r.json(); return auth.success;
         }
 
         document.getElementById('speedrunForm').onsubmit = async (e) => {
             e.preventDefault();
             if(await getPass()) {
-                const run = { 
-                    name: document.getElementById('playerName').value, 
-                    hours: parseInt(document.getElementById('h').value)||0, 
-                    minutes: parseInt(document.getElementById('m').value), 
-                    seconds: parseInt(document.getElementById('s').value), 
-                    ms: parseInt(document.getElementById('ms').value), 
-                    version: document.getElementById('v').value, 
-                    seed: document.getElementById('seed').value 
-                };
-                await _supabase.from('speedruns').insert([run]); 
-                playExp(); fetchAll(); e.target.reset();
-            } else { alert("HASŁO BŁĘDNE"); }
+                const run = { name: document.getElementById('playerName').value, hours: parseInt(document.getElementById('h').value)||0, minutes: parseInt(document.getElementById('m').value), seconds: parseInt(document.getElementById('s').value), ms: parseInt(document.getElementById('ms').value), version: document.getElementById('v').value, seed: document.getElementById('seed').value };
+                await _supabase.from('speedruns').insert([run]); fetchAll(); e.target.reset();
+            } else alert("HASŁO BŁĘDNE");
         };
 
-        async function delRun(id) {
-            playClick();
-            if(await getPass()) { await _supabase.from('speedruns').delete().eq('id', id); fetchAll(); } 
-        }
+        async function delRun(id) { if(await getPass()) { await _supabase.from('speedruns').delete().eq('id', id); fetchAll(); } }
 
         function showHistory(name) {
-            playClick();
             const runs = speedruns.filter(r => r.name.toLowerCase() === name.toLowerCase());
             let html = ''; let best = Infinity;
             runs.forEach(r => {
@@ -316,54 +266,19 @@
             document.getElementById('historyModal').style.display = 'flex';
         }
 
-       // Tło cząsteczek - ZAKTUALIZOWANE DLA LEPSZEJ WIDOCZNOŚCI
-        const canvas = document.getElementById('bg-stars');
-        const ctx = canvas.getContext('2d');
+        // CZĄSTECZKI - MOCNIEJSZE
+        const canvas = document.getElementById('bg-stars'); const ctx = canvas.getContext('2d');
         let dots = [];
-
-        function initDots() {
-            canvas.width = window.innerWidth; 
-            canvas.height = window.innerHeight;
-            dots = [];
-            // Zwiększono liczbę cząsteczek do 100 dla bogatszego efektu
-            for(let i=0; i<100; i++) {
-                dots.push({
-                    x: Math.random() * canvas.width, 
-                    y: Math.random() * canvas.height, 
-                    s: Math.random() * 2.5 + 0.5, // Nieco większe kropki
-                    v: Math.random() * 0.5 + 0.2
-                });
-            }
-        }
-
+        function initDots() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; dots = []; for(let i=0; i<100; i++) dots.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, s:Math.random()*2.5+0.5, v:Math.random()*0.5+0.2}); }
         function anim() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0,0,canvas.width, canvas.height);
             const color = getComputedStyle(document.body).getPropertyValue('--primary');
-            
-            ctx.fillStyle = color;
-            // DODANIE EFEKTU POŚWIATY (GLOW)
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = color;
-
-            dots.forEach(d => {
-                d.y -= d.v; 
-                if(d.y < 0) d.y = canvas.height;
-                
-                // ZWIĘKSZONA WIDOCZNOŚĆ (Alpha z 0.3 na 0.8)
-                ctx.globalAlpha = 0.8; 
-                ctx.fillRect(d.x, d.y, d.s, d.s);
-            });
-            
-            ctx.shadowBlur = 0; // Reset blur dla wydajności
+            ctx.fillStyle = color; ctx.shadowBlur = 10; ctx.shadowColor = color; ctx.globalAlpha = 0.8;
+            dots.forEach(d => { d.y -= d.v; if(d.y<0) d.y=canvas.height; ctx.fillRect(d.x, d.y, d.s, d.s); });
             requestAnimationFrame(anim);
         }
-
-        window.onresize = initDots;
-        initDots(); 
-        anim();
-
+        window.onresize = initDots; initDots(); anim();
         fetchAll();
     </script>
 </body>
 </html>
-
