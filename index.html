@@ -51,12 +51,13 @@
 
         .theme-switcher { position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; }
         .theme-btn { width: 25px; height: 25px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; transition: 0.3s; }
-        .theme-btn:hover { transform: scale(1.2); }
 
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: rgba(0,0,0,0.75); padding: 20px; border-radius: 10px; border: 1px solid var(--primary); text-align: center; backdrop-filter: blur(10px); position: relative; overflow: hidden; }
-        .glow-bar { position: absolute; bottom: 0; left: 0; height: 4px; width: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); animation: pulse-bar 2s infinite ease-in-out; }
-        @keyframes pulse-bar { 0%, 100% { opacity: 0.3; width: 10%; left: 45%; } 50% { opacity: 1; width: 100%; left: 0%; } }
+        
+        /* POPRAWIONY PASEK - DELIKATNE PULSOWANIE */
+        .glow-bar { position: absolute; bottom: 0; left: 0; height: 3px; width: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); animation: gentle-glow 3s infinite ease-in-out; }
+        @keyframes gentle-glow { 0%, 100% { opacity: 0.25; filter: brightness(0.7); } 50% { opacity: 0.9; filter: brightness(1.2); box-shadow: 0 0 20px var(--primary); } }
 
         .leaderboard { background: rgba(0, 0, 0, 0.85); border-radius: 15px; padding: 30px; margin-bottom: 40px; border: 1px solid var(--primary); overflow-x: auto; backdrop-filter: blur(10px); }
         table { width: 100%; border-collapse: collapse; min-width: 750px; }
@@ -67,7 +68,7 @@
         tr.top-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.05) 0%, transparent 100%); border-left: 5px solid #cd7f32; }
 
         .nick-1 { background: linear-gradient(90deg, #fff, #ffd700, #fff); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; animation: shine 3s linear infinite; }
-        .nick-2 { color: #e0e0e0; font-weight: 700; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .nick-2 { color: #e0e0e0; font-weight: 700; }
         .nick-3 { color: #cd7f32; font-weight: 700; }
         @keyframes shine { to { background-position: 200% center; } }
 
@@ -81,21 +82,18 @@
         .info-btn { cursor: pointer; color: var(--primary); font-size: 1.2rem; opacity: 0.7; }
         .time { font-family: 'Courier New', monospace; font-weight: 700; }
 
-        /* KARTA EKSPORTU */
         #shareCard { position: absolute; left: -9999px; width: 750px; height: 400px; padding: 40px; background: #0a0a0a; border: 6px solid var(--primary); display: flex; align-items: center; gap: 40px; font-family: 'Orbitron'; color: #fff; overflow: hidden; }
         .card-bg-text { position: absolute; font-size: 12rem; font-weight: 900; opacity: 0.05; right: -20px; bottom: -40px; z-index: 0; color: #fff; }
         .card-body-img { height: 340px; z-index: 1; filter: drop-shadow(0 0 20px var(--primary)); }
         .card-content { z-index: 2; text-align: left; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 9999; justify-content: center; align-items: center; }
-        .modal-content { background: #111; padding: 30px; border: 2px solid var(--primary); border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .modal-content { background: #111; padding: 30px; border: 2px solid var(--primary); border-radius: 20px; width: 90%; max-width: 500px; }
         .history-list { list-style: none; margin-top: 20px; max-height: 400px; overflow-y: auto; }
         .history-item { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
 
         .submit-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; text-transform: uppercase; transition: 0.3s; letter-spacing: 2px; }
-        .submit-btn:hover { box-shadow: 0 0 30px var(--primary); transform: translateY(-2px); }
-        input, select { padding: 12px; background: #000; border: 1px solid #333; color: var(--primary); border-radius: 8px; width: 100%; font-family: 'Orbitron'; outline: none; }
-        input:focus { border-color: var(--primary); }
+        input, select { padding: 12px; background: #000; border: 1px solid #333; color: var(--primary); border-radius: 8px; width: 100%; font-family: 'Orbitron'; }
     </style>
 </head>
 <body>
@@ -113,7 +111,7 @@
 
         <div class="stats">
             <div class="stat-card"> <div id="totalRuns" style="font-size: 2rem; font-weight: 900;">0</div> <div>Łącznie biegów</div> </div>
-            <div class="stat-card" style="border-color: #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.2);"> 
+            <div class="stat-card" style="border-color: #ffd700;"> 
                 <div id="bestTime" style="font-size: 1.8rem; font-weight: 900; color: #ffd700;">--:--:--.---</div> 
                 <div style="font-size: 0.8rem; letter-spacing: 2px;">REKORD ŚWIATA</div> 
                 <div class="glow-bar"></div>
@@ -127,8 +125,8 @@
             </table>
         </div>
 
-        <div class="stat-card" style="margin-bottom: 40px; background: rgba(0,0,0,0.9);">
-            <h2 style="margin-bottom: 25px; font-size: 1.2rem; color: #fff;">📝 DODAJ NOWY WYNIK</h2>
+        <div class="stat-card" style="margin-bottom: 40px;">
+            <h2 style="margin-bottom: 25px; font-size: 1.2rem;">📝 DODAJ NOWY WYNIK</h2>
             <form id="speedrunForm">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 12px; margin-bottom: 15px;">
                     <input type="text" id="playerName" placeholder="NICK GRACZA" required style="grid-column: span 2;">
@@ -142,7 +140,7 @@
                         <option value="1.16.1">Wersja 1.16.1</option>
                         <option value="1.20.1">Wersja 1.20.1</option>
                     </select>
-                    <input type="text" id="seed" placeholder="SEED ŚWIATA (OPCJONALNIE)">
+                    <input type="text" id="seed" placeholder="SEED ŚWIATA">
                 </div>
                 <button type="submit" class="submit-btn">🚀 WYŚLIJ WYNIK</button>
             </form>
@@ -153,16 +151,16 @@
         <div class="card-bg-text" id="cRank">#1</div>
         <img id="cImg" class="card-body-img" src="">
         <div class="card-content">
-            <h4 style="color: var(--primary); letter-spacing: 3px; font-size: 0.9rem; margin-bottom: 5px;">NEW WORLD RECORD</h4>
-            <h2 id="cName" style="font-size: 2.8rem; margin-bottom: 10px; color: #fff;">Nick</h2>
+            <h4 style="color: var(--primary); letter-spacing: 3px; font-size: 0.9rem;">NEW RECORD</h4>
+            <h2 id="cName" style="font-size: 2.8rem; margin-bottom: 10px;">Nick</h2>
             <div id="cTime" style="font-size: 4rem; font-weight: 900; line-height: 1; color: var(--primary);">00:00:00.000</div>
-            <p id="cVer" style="opacity: 0.6; margin-top: 20px; font-size: 1.1rem;">Minecraft 1.16.1</p>
-            <p id="cDate" style="font-size: 0.8rem; opacity: 0.3; margin-top: 5px;">2026-02-22</p>
+            <p id="cVer" style="opacity: 0.6; margin-top: 20px;">Minecraft 1.16.1</p>
+            <p id="cDate" style="font-size: 0.8rem; opacity: 0.3;">2026-02-22</p>
         </div>
     </div>
 
     <div id="historyModal" class="modal"><div class="modal-content"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;"><h3 id="histName">Historia</h3><button onclick="document.getElementById('historyModal').style.display='none'" style="background:none; border:none; color:#ff4444; font-size:2rem; cursor:pointer;">&times;</button></div><ul id="historyList" class="history-list"></ul></div></div>
-    <div id="passwordModal" class="modal"><div class="modal-content"><h3>🔒 Autoryzacja Admina</h3><input type="password" id="passInput" placeholder="HASŁO..." style="margin: 25px 0; text-align: center; letter-spacing: 8px; font-size: 1.2rem;"><button id="confirmPass" class="submit-btn">POTWIERDŹ</button></div></div>
+    <div id="passwordModal" class="modal"><div class="modal-content"><h3>🔒 Autoryzacja Admina</h3><input type="password" id="passInput" placeholder="HASŁO..." style="margin: 25px 0; text-align: center; letter-spacing: 8px;"><button id="confirmPass" class="submit-btn">POTWIERDŹ</button></div></div>
 
     <script>
         const SUPABASE_URL = 'https://tedjwbyhwqakosdbaclu.supabase.co';
@@ -170,14 +168,12 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let speedruns = [];
 
-        // DŹWIĘKI
         const sndClick = new Audio('https://www.soundjay.com/buttons/sounds/button-16.mp3'); 
-        const sndExp = new Audio('https://rpg.hamsterrepublic.com/wiki-images/2/21/Level_Up.mp3'); // Stabilniejszy dźwięk awansu
+        const sndExp = new Audio('https://rpg.hamsterrepublic.com/wiki-images/2/21/Level_Up.mp3');
 
         function playClick() { sndClick.currentTime = 0; sndClick.play().catch(()=>{}); }
         function playExp() { sndExp.currentTime = 0; sndExp.volume = 0.5; sndExp.play().catch(()=>{}); }
 
-        // BACKGROUND PARTICLES
         const canvas = document.getElementById('bg-stars');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -205,7 +201,6 @@
             return `${h}:${m}:${s}.${ms}`;
         };
 
-        // EXPORT Z PEŁNYM SKINEM I MS
         async function downloadCard(name, time, rank, version) {
             playClick();
             document.getElementById('cName').textContent = name;
@@ -288,20 +283,56 @@
             else alert("BŁĄD HASŁA!");
         }
 
-        document.getElementById('speedrunForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const run = { 
-                name: document.getElementById('playerName').value, 
-                hours: parseInt(document.getElementById('h').value)||0, 
-                minutes: parseInt(document.getElementById('m').value), 
-                seconds: parseInt(document.getElementById('s').value), 
-                ms: parseInt(document.getElementById('ms').value), 
-                version: document.getElementById('v').value, 
-                seed: document.getElementById('seed').value 
-            };
-            await _supabase.from('speedruns').insert([run]); 
-            playExp(); 
-            e.target.reset(); fetchAll();
+       // ... (reszta kodu bez zmian aż do obsługi formularza)
+
+document.getElementById('speedrunForm').onsubmit = async (e) => {
+    e.preventDefault();
+    
+    // PUNKT 5: PRZYWRÓCONA AUTORYZACJA PRZED DODANIEM
+    playClick();
+    const pass = await new Promise(res => {
+        const m = document.getElementById('passwordModal');
+        m.style.display = 'flex';
+        document.getElementById('confirmPass').onclick = () => {
+            m.style.display = 'none';
+            res(document.getElementById('passInput').value);
+        };
+    });
+
+    const resp = await fetch('/api/check-password', { 
+        method: 'POST', 
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify({password: pass})
+    });
+    
+    const auth = await resp.json();
+
+    if(auth.success) {
+        const run = { 
+            name: document.getElementById('playerName').value, 
+            hours: parseInt(document.getElementById('h').value)||0, 
+            minutes: parseInt(document.getElementById('m').value), 
+            seconds: parseInt(document.getElementById('s').value), 
+            ms: parseInt(document.getElementById('ms').value), 
+            version: document.getElementById('v').value, 
+            seed: document.getElementById('seed').value 
+        };
+        
+        const { error } = await _supabase.from('speedruns').insert([run]);
+        
+        if(!error) {
+            playExp(); // Dźwięk sukcesu tylko po autoryzacji
+            e.target.reset(); 
+            fetchAll();
+        } else {
+            alert("Błąd bazy danych!");
+        }
+    } else {
+        alert("NIEPOPRAWNE HASŁO ADMINA!");
+    }
+};
+
+// ... (reszta kodu)
         };
 
         fetchAll();
