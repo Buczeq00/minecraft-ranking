@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Speedrun Leaderboard</title>
+    <title>Minecraft Speedrun Leaderboard PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -43,59 +43,62 @@
         }
 
         #bg-stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-        .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+        .container { max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; }
         
+        /* HEADER */
         .header { text-align: center; margin-bottom: 40px; padding: 40px 0; background: rgba(0,0,0,0.85); border-radius: 15px; border: 2px solid var(--primary); box-shadow: 0 0 30px var(--shadow); position: relative; overflow: hidden; }
-        .glitch { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; position: relative; display: inline-block; text-shadow: 0.05em 0 0 var(--glitch-1), -0.025em -0.05em 0 var(--glitch-2), 0.025em 0.05em 0 #fff; animation: glitch 500ms infinite; }
-        @keyframes glitch { 0%, 14%, 49%, 100% { text-shadow: 0.05em 0 0 var(--glitch-1), -0.05em -0.025em 0 var(--glitch-2); } 15%, 50%, 99% { text-shadow: -0.05em -0.025em 0 var(--glitch-1), 0.025em 0.025em 0 var(--glitch-2); } }
+        .glitch { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; position: relative; display: inline-block; animation: glitch-anim 500ms infinite; }
+        @keyframes glitch-anim { 0%, 100% { text-shadow: 0.05em 0 0 var(--glitch-1), -0.05em -0.025em 0 var(--glitch-2); } 50% { text-shadow: -0.05em -0.025em 0 var(--glitch-1), 0.025em 0.025em 0 var(--glitch-2); } }
 
-        .theme-switcher { position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; }
-        .theme-btn { width: 25px; height: 25px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; transition: 0.3s; }
-        .theme-btn:hover { transform: scale(1.2); }
+        .theme-switcher { position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; }
+        .theme-btn { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; transition: 0.3s; }
 
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: rgba(0,0,0,0.75); padding: 20px; border-radius: 10px; border: 1px solid var(--primary); text-align: center; backdrop-filter: blur(10px); position: relative; overflow: hidden; }
-        
-        /* SUBTELNE PULSOWANIE PASKA */
-        .glow-bar { position: absolute; bottom: 0; left: 0; height: 3px; width: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); animation: gentle-glow 3s infinite ease-in-out; }
-        @keyframes gentle-glow { 0%, 100% { opacity: 0.25; filter: brightness(0.7); } 50% { opacity: 0.9; filter: brightness(1.2); box-shadow: 0 0 20px var(--primary); } }
+        /* LAYOUT MAIN */
+        .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 30px; }
+        @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr; } }
 
-        .leaderboard { background: rgba(0, 0, 0, 0.85); border-radius: 15px; padding: 30px; margin-bottom: 40px; border: 1px solid var(--primary); overflow-x: auto; backdrop-filter: blur(10px); }
-        table { width: 100%; border-collapse: collapse; min-width: 750px; }
+        /* LEADERBOARD TABLE */
+        .leaderboard-card { background: rgba(0, 0, 0, 0.85); border-radius: 15px; padding: 30px; border: 1px solid var(--primary); overflow-x: auto; backdrop-filter: blur(10px); }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; }
         
-        tr.top-1 { background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%); border-left: 5px solid #ffd700; }
-        tr.top-2 { background: linear-gradient(90deg, rgba(192, 192, 192, 0.05) 0%, transparent 100%); border-left: 5px solid #c0c0c0; }
-        tr.top-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.05) 0%, transparent 100%); border-left: 5px solid #cd7f32; }
-
+        tr.top-1 { background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent); border-left: 5px solid #ffd700; }
         .nick-1 { background: linear-gradient(90deg, #fff, #ffd700, #fff); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; animation: shine 3s linear infinite; }
-        .nick-2 { color: #e0e0e0; font-weight: 700; }
-        .nick-3 { color: #cd7f32; font-weight: 700; }
         @keyframes shine { to { background-position: 200% center; } }
 
-        .rank { font-weight: 900; }
-        .rank-1 { color: #ffd700; font-size: 1.4rem; }
-        .rank-2 { color: #c0c0c0; font-size: 1.25rem; }
-        .rank-3 { color: #cd7f32; font-size: 1.15rem; }
+        /* HERO SECTION (PO PRAWEJ) */
+        .record-hero {
+            background: rgba(0,0,0,0.85); border: 2px solid #ffd700; border-radius: 20px;
+            padding: 40px 20px; text-align: center; position: sticky; top: 20px;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.2); height: fit-content;
+        }
+        .hero-skin { height: 380px; filter: drop-shadow(0 0 20px var(--primary)); margin: 25px 0; }
+        .hero-name-tag {
+            background: rgba(0,0,0,0.8); border: 2px solid #fff; padding: 6px 20px;
+            display: inline-block; font-weight: bold; color: #fff; border-radius: 4px;
+            position: relative; z-index: 5; box-shadow: 0 4px 0 #333;
+        }
+        .hero-time { font-size: 2.5rem; font-weight: 900; color: #ffd700; margin-top: 15px; }
+        .glow-bar-subtle { height: 3px; width: 100%; background: #ffd700; margin-top: 20px; animation: gentle-glow 3s infinite; }
+        @keyframes gentle-glow { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; box-shadow: 0 0 15px #ffd700; } }
 
-        .player { display: flex; align-items: center; gap: 12px; }
-        .player-head { width: 35px; height: 35px; border-radius: 6px; border: 1px solid var(--primary); }
-        .info-btn { cursor: pointer; color: var(--primary); font-size: 1.2rem; opacity: 0.7; }
-        .time { font-family: 'Courier New', monospace; font-weight: 700; }
+        /* FORMULARZ */
+        .form-card { background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; border: 1px solid var(--primary); margin-top: 30px; }
+        .submit-btn { width: 100%; padding: 16px; background: var(--primary); color: #000; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        .submit-btn:hover { box-shadow: 0 0 25px var(--primary); transform: translateY(-2px); }
+        
+        input, select { padding: 12px; background: #000; border: 1px solid #333; color: var(--primary); border-radius: 8px; width: 100%; font-family: 'Orbitron'; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 10px var(--shadow); }
 
-        /* KARTA EKSPORTU */
-        #shareCard { position: absolute; left: -9999px; width: 750px; height: 400px; padding: 40px; background: #0a0a0a; border: 6px solid var(--primary); display: flex; align-items: center; gap: 40px; font-family: 'Orbitron'; color: #fff; overflow: hidden; }
-        .card-bg-text { position: absolute; font-size: 12rem; font-weight: 900; opacity: 0.05; right: -20px; bottom: -40px; z-index: 0; color: #fff; }
-        .card-body-img { height: 340px; z-index: 1; filter: drop-shadow(0 0 20px var(--primary)); }
-        .card-content { z-index: 2; text-align: left; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 9999; justify-content: center; align-items: center; }
-        .modal-content { background: #111; padding: 30px; border: 2px solid var(--primary); border-radius: 20px; width: 90%; max-width: 500px; }
-        .history-list { list-style: none; margin-top: 20px; max-height: 400px; overflow-y: auto; }
+        /* MODALE */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); backdrop-filter: blur(10px); z-index: 9999; justify-content: center; align-items: center; }
+        .modal-content { background: #111; padding: 40px; border: 2px solid var(--primary); border-radius: 20px; width: 90%; max-width: 550px; }
         .history-item { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
 
-        .submit-btn { width: 100%; padding: 15px; background: var(--primary); color: #000; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; text-transform: uppercase; transition: 0.3s; letter-spacing: 2px; }
-        input, select { padding: 12px; background: #000; border: 1px solid #333; color: var(--primary); border-radius: 8px; width: 100%; font-family: 'Orbitron'; }
+        /* SHARE CARD HIDDEN */
+        #shareCard { position: absolute; left: -9999px; width: 800px; height: 450px; background: #0a0a0a; border: 8px solid var(--primary); display: flex; align-items: center; padding: 50px; color: #fff; font-family: 'Orbitron'; }
+
+        .player-head { width: 32px; height: 32px; border-radius: 4px; vertical-align: middle; margin-right: 12px; border: 1px solid var(--primary); }
     </style>
 </head>
 <body>
@@ -111,58 +114,64 @@
             <h1 class="glitch">MINECRAFT RANKING</h1>
         </div>
 
-        <div class="stats">
-            <div class="stat-card"> <div id="totalRuns" style="font-size: 2rem; font-weight: 900;">0</div> <div>Łącznie biegów</div> </div>
-            <div class="stat-card" style="border-color: #ffd700;"> 
-                <div id="bestTime" style="font-size: 1.8rem; font-weight: 900; color: #ffd700;">--:--:--.---</div> 
-                <div style="font-size: 0.8rem; letter-spacing: 2px;">REKORD ŚWIATA</div> 
-                <div class="glow-bar"></div>
+        <div class="main-grid">
+            <div class="left-col">
+                <div class="leaderboard-card">
+                    <table>
+                        <thead><tr><th>#</th><th>Gracz</th><th>Czas (+Seed)</th><th>Wersja</th><th>Akcja</th></tr></thead>
+                        <tbody id="leaderboardBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="form-card">
+                    <h3 style="margin-bottom: 20px; font-size: 1rem; color: #fff;">📝 DODAJ NOWY REKORD</h3>
+                    <form id="speedrunForm">
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+                            <input type="text" id="playerName" placeholder="NICK" required>
+                            <input type="number" id="h" placeholder="H" min="0">
+                            <input type="number" id="m" placeholder="M" min="0" max="59" required>
+                            <input type="number" id="s" placeholder="S" min="0" max="59" required>
+                            <input type="number" id="ms" placeholder="MS" min="0" max="999" required>
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <select id="v" required>
+                                <option value="1.16.1">Wersja 1.16.1</option>
+                                <option value="1.20.1">Wersja 1.20.1</option>
+                            </select>
+                            <input type="text" id="seed" placeholder="SEED (OPCJONALNIE)">
+                        </div>
+                        <button type="submit" class="submit-btn">🚀 AUTORYZUJ I WYŚLIJ</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="heroBox" class="record-hero" style="display: none;">
+                <p style="letter-spacing: 4px; font-size: 0.7rem; color: #ffd700; font-weight: 900;">WORLD RECORD HOLDER</p>
+                <div style="margin-top: 30px;">
+                    <div id="hNameTag" class="hero-name-tag">---</div>
+                    <img id="hSkin" class="hero-skin" src="" alt="Skin">
+                </div>
+                <div class="hero-time" id="hTime">00:00:00.000</div>
+                <div id="hVer" style="opacity: 0.5; font-size: 0.8rem; margin-top: 10px;">Minecraft 1.16.1</div>
+                <div id="hSeed" style="font-size: 0.6rem; opacity: 0.3; margin-top: 10px; word-break: break-all;">SEED: ---</div>
+                <div class="glow-bar-subtle"></div>
             </div>
         </div>
-
-        <div class="leaderboard">
-            <table>
-                <thead><tr><th>#</th><th>Gracz</th><th>Czas (+Seed)</th><th>Wersja</th><th>Akcja</th></tr></thead>
-                <tbody id="leaderboardBody"></tbody>
-            </table>
-        </div>
-
-        <div class="stat-card" style="margin-bottom: 40px; background: rgba(0,0,0,0.95);">
-            <h2 style="margin-bottom: 25px; font-size: 1.2rem;">📝 DODAJ NOWY WYNIK</h2>
-            <form id="speedrunForm">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 12px; margin-bottom: 15px;">
-                    <input type="text" id="playerName" placeholder="NICK GRACZA" required style="grid-column: span 2;">
-                    <input type="number" id="h" placeholder="H" min="0">
-                    <input type="number" id="m" placeholder="M" min="0" max="59" required>
-                    <input type="number" id="s" placeholder="S" min="0" max="59" required>
-                    <input type="number" id="ms" placeholder="MS" min="0" max="999" required>
-                </div>
-                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-                    <select id="v" required>
-                        <option value="1.16.1">Wersja 1.16.1</option>
-                        <option value="1.20.1">Wersja 1.20.1</option>
-                    </select>
-                    <input type="text" id="seed" placeholder="SEED ŚWIATA">
-                </div>
-                <button type="submit" class="submit-btn">🚀 WYŚLIJ WYNIK</button>
-            </form>
-        </div>
     </div>
+
+    <div id="passwordModal" class="modal"><div class="modal-content"><h3>🔒 Autoryzacja Admina</h3><input type="password" id="passInput" placeholder="HASŁO..." style="margin: 25px 0; text-align: center; letter-spacing: 8px; font-size: 1.5rem;"><button id="confirmPass" class="submit-btn">POTWIERDŹ</button></div></div>
+    <div id="historyModal" class="modal"><div class="modal-content"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h3 id="histName">Historia</h3><button onclick="document.getElementById('historyModal').style.display='none'" style="background:none; border:none; color:#ff4444; font-size:2rem; cursor:pointer;">&times;</button></div><ul id="historyList" style="list-style:none; max-height: 400px; overflow-y:auto;"></ul></div></div>
 
     <div id="shareCard">
-        <div class="card-bg-text" id="cRank">#1</div>
-        <img id="cImg" class="card-body-img" src="">
-        <div class="card-content">
-            <h4 style="color: var(--primary); letter-spacing: 3px; font-size: 0.9rem;">NEW RECORD</h4>
-            <h2 id="cName" style="font-size: 2.8rem; margin-bottom: 10px;">Nick</h2>
-            <div id="cTime" style="font-size: 4rem; font-weight: 900; line-height: 1; color: var(--primary);">00:00:00.000</div>
-            <p id="cVer" style="opacity: 0.6; margin-top: 20px;">Minecraft 1.16.1</p>
-            <p id="cDate" style="font-size: 0.8rem; opacity: 0.3;">2026-02-22</p>
+        <div id="scRank" style="position: absolute; right: 20px; bottom: 0; font-size: 10rem; opacity: 0.1; font-weight: 900;">#1</div>
+        <img id="scImg" src="" style="height: 350px; filter: drop-shadow(0 0 20px var(--primary));">
+        <div style="margin-left: 40px;">
+            <h4 style="color: var(--primary); letter-spacing: 5px;">NEW RECORD</h4>
+            <h2 id="scName" style="font-size: 3rem; margin: 10px 0;">Nick</h2>
+            <div id="scTime" style="font-size: 4rem; font-weight: 900; color: var(--primary);">00:00:00.000</div>
+            <p id="scVer" style="opacity: 0.6; margin-top: 20px;">Minecraft 1.16.1</p>
         </div>
     </div>
-
-    <div id="historyModal" class="modal"><div class="modal-content"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;"><h3 id="histName">Historia</h3><button onclick="document.getElementById('historyModal').style.display='none'" style="background:none; border:none; color:#ff4444; font-size:2rem; cursor:pointer;">&times;</button></div><ul id="historyList" class="history-list"></ul></div></div>
-    <div id="passwordModal" class="modal"><div class="modal-content"><h3>🔒 Autoryzacja Admina</h3><input type="password" id="passInput" placeholder="HASŁO..." style="margin: 25px 0; text-align: center; letter-spacing: 8px;"><button id="confirmPass" class="submit-btn">POTWIERDŹ</button></div></div>
 
     <script>
         const SUPABASE_URL = 'https://tedjwbyhwqakosdbaclu.supabase.co';
@@ -170,30 +179,21 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let speedruns = [];
 
+        // DŹWIĘKI
         const sndClick = new Audio('https://www.soundjay.com/buttons/sounds/button-16.mp3'); 
         const sndExp = new Audio('https://rpg.hamsterrepublic.com/wiki-images/2/21/Level_Up.mp3');
-
         function playClick() { sndClick.currentTime = 0; sndClick.play().catch(()=>{}); }
         function playExp() { sndExp.currentTime = 0; sndExp.volume = 0.5; sndExp.play().catch(()=>{}); }
 
-        const canvas = document.getElementById('bg-stars');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.onresize = resize; resize();
-        class Particle { constructor() { this.reset(); } reset() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 3 + 1; this.speed = Math.random() * 0.4 + 0.1; this.alpha = Math.random(); } update() { this.y -= this.speed; if (this.y < 0) this.reset(); } draw() { ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--primary'); ctx.globalAlpha = this.alpha; ctx.fillRect(this.x, this.y, this.size, this.size); } }
-        for(let i=0; i<60; i++) particles.push(new Particle());
-        function animate() { ctx.clearRect(0,0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
-        animate();
-
+        // MOTYWY
         function setTheme(theme) { 
             playClick();
             document.body.className = theme === 'cyber' ? '' : 'theme-' + theme; 
             localStorage.setItem('leaderboard-theme', theme); 
         }
-        const savedTheme = localStorage.getItem('leaderboard-theme');
-        if(savedTheme) setTheme(savedTheme);
+        if(localStorage.getItem('leaderboard-theme')) setTheme(localStorage.getItem('leaderboard-theme'));
 
+        // CZAS I FORMATOWANIE
         const toMs = (h, m, s, ms) => ((h||0)*3600000) + ((m||0)*60000) + ((s||0)*1000) + (ms||0);
         const fmt = (t) => {
             const h = Math.floor(t/3600000).toString().padStart(2,'0');
@@ -203,111 +203,84 @@
             return `${h}:${m}:${s}.${ms}`;
         };
 
-        async function downloadCard(name, time, rank, version) {
-            playClick();
-            document.getElementById('cName').textContent = name;
-            document.getElementById('cTime').textContent = time;
-            document.getElementById('cRank').textContent = `#${rank}`;
-            document.getElementById('cVer').textContent = `Minecraft ${version}`;
-            document.getElementById('cDate').textContent = new Date().toLocaleDateString();
-            document.getElementById('cImg').src = `https://mc-heads.net/body/${name}`;
+        // PARTICLES
+        const canvas = document.getElementById('bg-stars');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.onresize = resize; resize();
+        class P { constructor() { this.reset(); } reset() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.s = Math.random()*2+1; this.v = Math.random()*0.5+0.1; } update() { this.y -= this.v; if(this.y<0) this.reset(); } draw() { ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--primary'); ctx.globalAlpha = 0.4; ctx.fillRect(this.x, this.y, this.s, this.s); } }
+        for(let i=0; i<80; i++) particles.push(new P());
+        function anim() { ctx.clearRect(0,0,canvas.width, canvas.height); particles.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(anim); }
+        anim();
 
-            setTimeout(async () => {
-                const card = document.getElementById('shareCard');
-                const canvas = await html2canvas(card, { backgroundColor: '#0a0a0a', useCORS: true, scale: 2 });
-                const link = document.createElement('a'); 
-                link.download = `Speedrun_Record_${name}.png`; 
-                link.href = canvas.toDataURL(); link.click();
-            }, 1000);
-        }
-
+        // POBIERANIE DANYCH
         async function fetchAll() {
-            const { data, error } = await _supabase.from('speedruns').select('*').order('created_at', { ascending: true });
-            if(!error) { speedruns = data || []; render(); }
+            const { data } = await _supabase.from('speedruns').select('*').order('created_at', { ascending: true });
+            speedruns = data || [];
+            render();
         }
 
-        function showHistory(name) {
-            playClick();
-            const playerRuns = speedruns.filter(r => r.name.toLowerCase() === name.toLowerCase());
-            let listHtml = ''; let bestSoFar = Infinity;
-            playerRuns.forEach((r) => {
-                const current = toMs(r.hours, r.minutes, r.seconds, r.ms);
-                let deltaHtml = ''; if(current < bestSoFar) { if(bestSoFar !== Infinity) deltaHtml = `<span style="color:#00ff88; font-size:0.75rem; font-weight:bold; display:block; margin-top:4px;">Poprawa o: -${fmt(bestSoFar - current)}</span>`; bestSoFar = current; }
-                listHtml = `<li class="history-item"><div><div style="font-size:0.6rem; opacity:0.4;">BIEG Z DNIA ${new Date(r.created_at).toLocaleDateString()}</div><span class="time">${fmt(current)}</span>${deltaHtml}</div><span style="opacity:0.6; font-size:0.8rem;">${r.version}</span></li>` + listHtml;
-            });
-            document.getElementById('histName').textContent = "HISTORIA: " + name.toUpperCase(); 
-            document.getElementById('historyList').innerHTML = listHtml; 
-            document.getElementById('historyModal').style.display = 'flex';
-        }
-
+        // RENDEROWANIE
         function render() {
             const tbody = document.getElementById('leaderboardBody');
             tbody.innerHTML = '';
-            const bestPerPlayer = {};
+            const bests = {};
             speedruns.forEach(r => {
                 const total = toMs(r.hours, r.minutes, r.seconds, r.ms);
-                if(!bestPerPlayer[r.name] || total < bestPerPlayer[r.name].total) bestPerPlayer[r.name] = {...r, total};
+                if(!bests[r.name] || total < bests[r.name].total) bests[r.name] = {...r, total};
             });
-            const sorted = Object.values(bestPerPlayer).sort((a,b) => a.total - b.total);
+            const sorted = Object.values(bests).sort((a,b) => a.total - b.total);
+
+            // HERO SECTION (REKORD ŚWIATA)
+            if(sorted.length > 0) {
+                const wr = sorted[0];
+                document.getElementById('heroBox').style.display = 'block';
+                document.getElementById('hNameTag').textContent = wr.name;
+                document.getElementById('hSkin').src = `https://mc-heads.net/body/${wr.name}`;
+                document.getElementById('hTime').textContent = fmt(wr.total);
+                document.getElementById('hVer').textContent = `Minecraft ${wr.version}`;
+                document.getElementById('hSeed').textContent = wr.seed ? `SEED: ${wr.seed}` : 'SEED: BRAK';
+            }
+
             sorted.forEach((run, i) => {
                 const row = document.createElement('tr');
-                let rCls = '', nCls = '';
-                if (i === 0) { rCls = 'rank-1'; nCls = 'nick-1'; row.classList.add('top-1'); }
-                else if (i === 1) { rCls = 'rank-2'; nCls = 'nick-2'; row.classList.add('top-2'); }
-                else if (i === 2) { rCls = 'rank-3'; nCls = 'nick-3'; row.classList.add('top-3'); }
+                let nCls = i === 0 ? 'nick-1' : '';
+                if(i < 3) row.classList.add(`top-${i+1}`);
+                
                 row.innerHTML = `
-                    <td><span class="rank ${rCls}">${i+1}</span></td>
-                    <td><div class="player"><img src="https://mc-heads.net/avatar/${run.name}/40" class="player-head"><span class="${nCls}">${run.name}</span><span class="info-btn" onclick="showHistory('${run.name}')">ⓘ</span></div></td>
-                    <td><span class="time">${fmt(run.total)}</span>${run.seed ? `<div style="font-size:0.6rem; opacity:0.4; cursor:pointer;" onclick="navigator.clipboard.writeText('${run.seed}');alert('Seed skopiowany!')">SEED: ${run.seed}</div>` : ''}</td>
+                    <td><b style="color:var(--primary)">${i+1}</b></td>
+                    <td><img src="https://mc-heads.net/avatar/${run.name}/32" class="player-head"><span class="${nCls}">${run.name}</span> <span style="cursor:pointer;opacity:0.5;" onclick="showHistory('${run.name}')">ⓘ</span></td>
+                    <td><b>${fmt(run.total)}</b><div style="font-size:0.6rem; opacity:0.3;">${run.seed || ''}</div></td>
                     <td>${run.version}</td>
                     <td>
-                        <div style="display: flex; gap: 15px; align-items: center;">
-                            <button title="Eksportuj kartę" onclick="downloadCard('${run.name}', '${fmt(run.total)}', ${i+1}, '${run.version}')" style="background:none; border:none; cursor:pointer; font-size:1.3rem;">🗺️</button>
-                            <button title="Usuń rekord" onclick="delRun(${run.id})" style="background:none; border:none; cursor:pointer; opacity:0.4; font-size:1.3rem;">🧨</button>
-                        </div>
+                        <button onclick="downloadCard('${run.name}','${fmt(run.total)}',${i+1},'${run.version}')" style="background:none; border:none; cursor:pointer; font-size:1.2rem; margin-right:10px;">🗺️</button>
+                        <button onclick="delRun(${run.id})" style="background:none; border:none; cursor:pointer; font-size:1.2rem; opacity:0.5;">🧨</button>
                     </td>
                 `;
                 tbody.appendChild(row);
             });
-            document.getElementById('totalRuns').textContent = speedruns.length;
-            if(sorted.length > 0) document.getElementById('bestTime').textContent = fmt(sorted[0].total);
         }
 
-        async function delRun(id) {
-            playClick();
+        // FUNKCJE MODALI I AKCJI
+        async function getPass() {
+            const modal = document.getElementById('passwordModal');
+            modal.style.display = 'flex';
             const pass = await new Promise(res => {
-                const m = document.getElementById('passwordModal'); m.style.display='flex';
-                document.getElementById('confirmPass').onclick = () => { m.style.display='none'; res(document.getElementById('passInput').value); };
+                document.getElementById('confirmPass').onclick = () => {
+                    modal.style.display = 'none';
+                    res(document.getElementById('passInput').value);
+                    document.getElementById('passInput').value = '';
+                };
             });
             const r = await fetch('/api/check-password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass})});
             const auth = await r.json();
-            if(auth.success) { await _supabase.from('speedruns').delete().eq('id', id); fetchAll(); } 
-            else alert("BŁĄD HASŁA!");
+            return auth.success;
         }
 
         document.getElementById('speedrunForm').onsubmit = async (e) => {
             e.preventDefault();
-            playClick();
-
-            // AUTORYZACJA ADMINA PRZED DODANIEM
-            const pass = await new Promise(res => {
-                const m = document.getElementById('passwordModal');
-                m.style.display = 'flex';
-                document.getElementById('confirmPass').onclick = () => {
-                    m.style.display = 'none';
-                    res(document.getElementById('passInput').value);
-                };
-            });
-
-            const resp = await fetch('/api/check-password', { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({password: pass})
-            });
-            
-            const auth = await resp.json();
-
-            if(auth.success) {
+            if(await getPass()) {
                 const run = { 
                     name: document.getElementById('playerName').value, 
                     hours: parseInt(document.getElementById('h').value)||0, 
@@ -317,20 +290,44 @@
                     version: document.getElementById('v').value, 
                     seed: document.getElementById('seed').value 
                 };
-                
-                const { error } = await _supabase.from('speedruns').insert([run]);
-                
-                if(!error) {
-                    playExp(); 
-                    e.target.reset(); 
-                    fetchAll();
-                } else {
-                    alert("Błąd połączenia z bazą!");
-                }
-            } else {
-                alert("NIEPOPRAWNE HASŁO ADMINA!");
-            }
+                await _supabase.from('speedruns').insert([run]); 
+                playExp(); fetchAll(); e.target.reset();
+            } else { alert("ZŁE HASŁO!"); }
         };
+
+        async function delRun(id) {
+            playClick();
+            if(await getPass()) { await _supabase.from('speedruns').delete().eq('id', id); fetchAll(); } 
+            else { alert("ZŁE HASŁO!"); }
+        }
+
+        function showHistory(name) {
+            playClick();
+            const runs = speedruns.filter(r => r.name.toLowerCase() === name.toLowerCase());
+            let html = ''; let best = Infinity;
+            runs.forEach(r => {
+                const t = toMs(r.hours, r.minutes, r.seconds, r.ms);
+                let diff = t < best && best !== Infinity ? `<span style="color:#00ff88; font-size:0.7rem;">(-${fmt(best-t)})</span>` : '';
+                if(t < best) best = t;
+                html = `<li class="history-item"><div><small>${new Date(r.created_at).toLocaleDateString()}</small><br><b>${fmt(t)}</b> ${diff}</div><span>${r.version}</span></li>` + html;
+            });
+            document.getElementById('histName').textContent = name.toUpperCase();
+            document.getElementById('historyList').innerHTML = html;
+            document.getElementById('historyModal').style.display = 'flex';
+        }
+
+        async function downloadCard(name, time, rank, ver) {
+            playClick();
+            document.getElementById('scName').textContent = name;
+            document.getElementById('scTime').textContent = time;
+            document.getElementById('scRank').textContent = `#${rank}`;
+            document.getElementById('scVer').textContent = ver;
+            document.getElementById('scImg').src = `https://mc-heads.net/body/${name}`;
+            setTimeout(async () => {
+                const canv = await html2canvas(document.getElementById('shareCard'), { backgroundColor:'#0a0a0a', useCORS:true });
+                const l = document.createElement('a'); l.download = `Record_${name}.png`; l.href = canv.toDataURL(); l.click();
+            }, 800);
+        }
 
         fetchAll();
     </script>
