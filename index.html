@@ -316,29 +316,54 @@
             document.getElementById('historyModal').style.display = 'flex';
         }
 
-        // Tło cząsteczek
+       // Tło cząsteczek - ZAKTUALIZOWANE DLA LEPSZEJ WIDOCZNOŚCI
         const canvas = document.getElementById('bg-stars');
         const ctx = canvas.getContext('2d');
         let dots = [];
+
         function initDots() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight;
             dots = [];
-            for(let i=0; i<80; i++) dots.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, s: Math.random()*2, v: Math.random()*0.5 + 0.2});
+            // Zwiększono liczbę cząsteczek do 100 dla bogatszego efektu
+            for(let i=0; i<100; i++) {
+                dots.push({
+                    x: Math.random() * canvas.width, 
+                    y: Math.random() * canvas.height, 
+                    s: Math.random() * 2.5 + 0.5, // Nieco większe kropki
+                    v: Math.random() * 0.5 + 0.2
+                });
+            }
         }
+
         function anim() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--primary');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const color = getComputedStyle(document.body).getPropertyValue('--primary');
+            
+            ctx.fillStyle = color;
+            // DODANIE EFEKTU POŚWIATY (GLOW)
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = color;
+
             dots.forEach(d => {
-                d.y -= d.v; if(d.y < 0) d.y = canvas.height;
-                ctx.globalAlpha = 0.3;
+                d.y -= d.v; 
+                if(d.y < 0) d.y = canvas.height;
+                
+                // ZWIĘKSZONA WIDOCZNOŚĆ (Alpha z 0.3 na 0.8)
+                ctx.globalAlpha = 0.8; 
                 ctx.fillRect(d.x, d.y, d.s, d.s);
             });
+            
+            ctx.shadowBlur = 0; // Reset blur dla wydajności
             requestAnimationFrame(anim);
         }
+
         window.onresize = initDots;
-        initDots(); anim();
+        initDots(); 
+        anim();
 
         fetchAll();
     </script>
 </body>
 </html>
+
