@@ -43,6 +43,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: var(--bg-gradient); color: var(--primary); font-family: 'Orbitron', monospace; min-height: 100vh; padding: 20px; transition: 0.5s; overflow-x: hidden; position: relative; }
         
+        /* OVERLAY TEXTURE */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: var(--overlay); opacity: 0.15; z-index: -1; pointer-events: none;
@@ -51,6 +52,7 @@
         #bg-stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
         .container { max-width: 1400px; margin: 0 auto; position: relative; z-index: 1; }
         
+        /* HEADER */
         .header { text-align: center; margin-bottom: 40px; padding: 40px 0; background: rgba(0,0,0,0.85); border-radius: 15px; border: 2px solid var(--primary); box-shadow: 0 0 30px var(--shadow); position: relative; overflow: hidden; }
         .glitch { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; animation: glitch-anim 500ms infinite; }
         @keyframes glitch-anim { 0%, 100% { text-shadow: 0.05em 0 0 var(--glitch-1), -0.05em -0.025em 0 var(--glitch-2); } 50% { text-shadow: -0.05em -0.025em 0 var(--glitch-1), 0.025em 0.025em 0 var(--glitch-2); } }
@@ -61,30 +63,26 @@
         .main-grid { display: grid; grid-template-columns: 1fr 400px; gap: 30px; align-items: start; }
         @media (max-width: 1150px) { .main-grid { grid-template-columns: 1fr; } }
 
-        /* TABELA I HOVER EFFECT */
+        /* LEADERBOARD TABLE */
         .leaderboard-card { background: rgba(0, 0, 0, 0.85); border-radius: 15px; padding: 30px; border: 1px solid var(--primary); overflow-x: auto; backdrop-filter: blur(10px); }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; transition: 0.2s; }
         
         tbody tr:hover { background: var(--row-hover); }
 
-        /* ENCHANTED GLOW DLA TOP 1 */
+        /* ENCHANTED GLOW FOR TOP 1 */
         tr.top-1 { 
             border-left: 5px solid #ffd700; 
-            position: relative;
             background: linear-gradient(90deg, var(--enchant-color), transparent);
             animation: enchant-shimmer 4s infinite linear;
         }
-        @keyframes enchant-shimmer {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(360deg); }
-        }
+        @keyframes enchant-shimmer { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
 
         .nick-1 { background: linear-gradient(90deg, #fff, #ffd700, #fff); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; animation: shine 3s linear infinite; }
         @keyframes shine { to { background-position: 200% center; } }
 
         .player-head { width: 32px; height: 32px; border-radius: 4px; vertical-align: middle; margin-right: 12px; border: 1px solid var(--primary); transition: 0.2s ease-out; }
-        tr:hover .player-head { transform: scale(1.3) rotate(5deg); box-shadow: 0 0 10px var(--primary); }
+        tr:hover .player-head { transform: scale(1.3) rotate(5deg); box-shadow: 0 0 15px var(--primary); }
 
         /* HERO SECTION */
         .record-hero {
@@ -103,13 +101,19 @@
         }
         .hero-time { font-family: 'VT323', monospace; font-size: 4rem; color: #ffd700; margin-top: 15px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); line-height: 1; }
         .glow-bar-subtle { height: 3px; width: 80%; background: #ffd700; margin-top: 25px; animation: gentle-glow 3s infinite; }
-        
-        /* FORMULARZ I MODALE */
+        @keyframes gentle-glow { 0%, 100% { opacity: 0.3; transform: scaleX(0.9); } 50% { opacity: 1; transform: scaleX(1.1); } }
+
+        /* FORM & MODALS */
         .form-card { background: rgba(0,0,0,0.9); padding: 30px; border-radius: 15px; border: 1px solid var(--primary); margin-top: 30px; }
-        .submit-btn { width: 100%; padding: 16px; background: var(--primary); color: #000; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+        .submit-btn { width: 100%; padding: 16px; background: var(--primary); color: #000; font-weight: 900; border: none; border-radius: 10px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; }
+        .submit-btn:hover { box-shadow: 0 0 20px var(--primary); transform: translateY(-2px); }
+        
         input, select { padding: 12px; background: #000; border: 1px solid #333; color: var(--primary); border-radius: 8px; width: 100%; font-family: 'Orbitron'; outline: none; margin-bottom: 10px; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); backdrop-filter: blur(10px); z-index: 9999; justify-content: center; align-items: center; }
         .modal-content { background: #111; padding: 40px; border: 2px solid var(--primary); border-radius: 20px; width: 90%; max-width: 550px; }
+        .history-item { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+
         #shareCard { position: absolute; left: -9999px; width: 800px; height: 450px; background: #0a0a0a; border: 8px solid var(--primary); display: flex; align-items: center; padding: 50px; color: #fff; font-family: 'Orbitron'; }
     </style>
 </head>
@@ -166,19 +170,15 @@
         </div>
     </div>
 
-    <div id="passwordModal" class="modal"><div class="modal-content"><h3>🔒 Admin Pass</h3><input type="password" id="passInput" style="margin:20px 0; text-align:center;"><button id="confirmPass" class="submit-btn">OK</button></div></div>
-    <div id="historyModal" class="modal"><div class="modal-content"><div style="display:flex; justify-content:space-between;"><h3>Historia</h3><button onclick="document.getElementById('historyModal').style.display='none'" style="color:red; background:none; border:none; cursor:pointer; font-size:1.5rem;">&times;</button></div><ul id="historyList" style="list-style:none; margin-top:20px; max-height:300px; overflow-y:auto;"></ul></div></div>
-
-    <div id="shareCard">
-        <div id="scRank" style="position: absolute; right: 20px; bottom: 0; font-size: 10rem; opacity: 0.1; font-weight: 900;">#1</div>
-        <img id="scImg" src="" style="height: 350px;">
-        <div style="margin-left: 40px;">
-            <h4 style="color: var(--primary); letter-spacing: 5px;">NEW RECORD</h4>
-            <h2 id="scName" style="font-size: 3rem; margin: 10px 0;">Nick</h2>
-            <div id="scTime" style="font-size: 4rem; font-weight: 900; color: var(--primary);">00:00:00.000</div>
-            <p id="scVer" style="opacity: 0.6; margin-top: 20px;">Minecraft 1.16.1</p>
+    <div id="passwordModal" class="modal"><div class="modal-content"><h3>🔒 Autoryzacja Admina</h3><input type="password" id="passInput" style="margin:20px 0; text-align:center; font-size: 2rem; letter-spacing: 5px;"><button id="confirmPass" class="submit-btn">POTWIERDŹ</button></div></div>
+    
+    <div id="historyModal" class="modal"><div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 id="histTitle">Historia Gracza</h3>
+            <button onclick="document.getElementById('historyModal').style.display='none'" style="color:#ff4444; background:none; border:none; cursor:pointer; font-size:2rem;">&times;</button>
         </div>
-    </div>
+        <ul id="historyList" style="list-style:none; max-height:400px; overflow-y:auto;"></ul>
+    </div></div>
 
     <script>
         const SUPABASE_URL = 'https://tedjwbyhwqakosdbaclu.supabase.co';
@@ -198,73 +198,39 @@
             currentTheme = theme;
             document.body.className = theme === 'cyber' ? '' : 'theme-' + theme; 
             localStorage.setItem('leaderboard-theme', theme);
-            initParticles(); // Restart cząsteczek przy zmianie motywu
+            initParticles();
         }
         if(localStorage.getItem('leaderboard-theme')) setTheme(localStorage.getItem('leaderboard-theme'));
 
-        // PARTICLES ENGINE (SMART THEMES)
+        // PARTICLE SYSTEM
         const canvas = document.getElementById('bg-stars');
         const ctx = canvas.getContext('2d');
         let pArray = [];
-
         class Particle {
             constructor() { this.init(); }
             init() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 this.size = Math.random() * 3 + 1;
-                this.speedX = (Math.random() - 0.5) * 0.5;
-                this.speedY = (Math.random() - 0.5) * 0.5;
                 this.alpha = Math.random();
-                
-                if(currentTheme === 'nether') { // Popiół - leci do góry
-                    this.speedY = -(Math.random() * 0.8 + 0.2);
-                    this.speedX = (Math.random() - 0.5) * 1.5;
-                } else if(currentTheme === 'cyber') { // Deszcz cyfrowy - leci w dół
-                    this.speedY = Math.random() * 3 + 1;
-                    this.speedX = 0;
-                    this.size = 2;
-                } else { // End - chaotyczna teleportacja
-                    this.speedX = (Math.random() - 0.5) * 4;
-                    this.speedY = (Math.random() - 0.5) * 4;
-                }
+                if(currentTheme === 'nether') { this.speedY = -(Math.random()*0.8+0.2); this.speedX = (Math.random()-0.5)*1.5; }
+                else if(currentTheme === 'cyber') { this.speedY = Math.random()*3+1; this.speedX = 0; this.size = 2; }
+                else { this.speedX = (Math.random()-0.5)*4; this.speedY = (Math.random()-0.5)*4; }
             }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.y < 0 || this.y > canvas.height || this.x < 0 || this.x > canvas.width) this.init();
-            }
+            update() { this.x += this.speedX; this.y += this.speedY; if (this.y<0 || this.y>canvas.height || this.x<0 || this.x>canvas.width) this.init(); }
             draw() {
                 ctx.globalAlpha = this.alpha;
                 ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--primary');
-                if(currentTheme === 'end') {
-                    ctx.fillRect(this.x, this.y, this.size, this.size); // Kwadraciki dla Endu
-                } else if(currentTheme === 'cyber') {
-                    ctx.fillRect(this.x, this.y, 1, this.size * 4); // Linie dla Cyber
-                } else {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
+                if(currentTheme === 'end') ctx.fillRect(this.x, this.y, this.size, this.size);
+                else if(currentTheme === 'cyber') ctx.fillRect(this.x, this.y, 1, this.size*4);
+                else { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill(); }
             }
         }
+        function initParticles() { pArray = []; canvas.width = window.innerWidth; canvas.height = window.innerHeight; for(let i=0; i<100; i++) pArray.push(new Particle()); }
+        function anim() { ctx.clearRect(0,0,canvas.width, canvas.height); pArray.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(anim); }
+        initParticles(); anim(); window.onresize = initParticles;
 
-        function initParticles() {
-            pArray = [];
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            for(let i=0; i<100; i++) pArray.push(new Particle());
-        }
-
-        function anim() {
-            ctx.clearRect(0,0,canvas.width, canvas.height);
-            pArray.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(anim);
-        }
-        initParticles(); anim();
-        window.onresize = initParticles;
-
-        // LOGIKA RANKINGU I ANIMACJI CZASU
+        // DATA & LOGIC
         const toMs = (h, m, s, ms) => ((h||0)*3600000) + ((m||0)*60000) + ((s||0)*1000) + (ms||0);
         const fmt = (t) => {
             const h = Math.floor(t/3600000).toString().padStart(2,'0');
@@ -276,8 +242,7 @@
 
         function animateTime(targetMs) {
             const display = document.getElementById('hTime');
-            let current = 0;
-            const step = targetMs / 30;
+            let current = 0; const step = targetMs / 30;
             const interval = setInterval(() => {
                 current += step;
                 if (current >= targetMs) { display.textContent = fmt(targetMs); clearInterval(interval); }
@@ -317,11 +282,11 @@
                 row.innerHTML = `
                     <td><b>${i+1}</b></td>
                     <td><img src="https://mc-heads.net/avatar/${run.name}/32" class="player-head"><span class="${i===0?'nick-1':''}">${run.name}</span> <span style="cursor:pointer;opacity:0.4;" onclick="showHistory('${run.name}')">ⓘ</span></td>
-                    <td><b style="font-family:'VT323',monospace; font-size:1.2rem;">${fmt(run.total)}</b></td>
+                    <td><b style="font-family:'VT323',monospace; font-size:1.3rem;">${fmt(run.total)}</b><div style="font-size:0.6rem; opacity:0.3;">${run.seed || ''}</div></td>
                     <td>${run.version}</td>
                     <td>
-                        <button onclick="downloadCard('${run.name}','${fmt(run.total)}',${i+1},'${run.version}')" style="background:none; border:none; cursor:pointer;">🗺️</button>
-                        <button onclick="delRun(${run.id})" style="background:none; border:none; cursor:pointer; margin-left:10px;">🧨</button>
+                        <button onclick="downloadCard('${run.name}','${fmt(run.total)}',${i+1},'${run.version}')" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">🗺️</button>
+                        <button onclick="delRun(${run.id})" style="background:none; border:none; cursor:pointer; margin-left:10px; font-size:1.2rem; opacity:0.5;">🧨</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -332,11 +297,7 @@
             const modal = document.getElementById('passwordModal');
             modal.style.display = 'flex';
             const pass = await new Promise(res => {
-                document.getElementById('confirmPass').onclick = () => {
-                    modal.style.display = 'none';
-                    res(document.getElementById('passInput').value);
-                    document.getElementById('passInput').value = '';
-                };
+                document.getElementById('confirmPass').onclick = () => { modal.style.display = 'none'; res(document.getElementById('passInput').value); document.getElementById('passInput').value = ''; };
             });
             const r = await fetch('/api/check-password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pass})});
             const auth = await r.json();
@@ -360,10 +321,7 @@
             } else { alert("HASŁO BŁĘDNE"); }
         };
 
-        async function delRun(id) {
-            playClick();
-            if(await getPass()) { await _supabase.from('speedruns').delete().eq('id', id); fetchAll(); } 
-        }
+        async function delRun(id) { playClick(); if(await getPass()) { await _supabase.from('speedruns').delete().eq('id', id); fetchAll(); } }
 
         function showHistory(name) {
             playClick();
@@ -373,8 +331,9 @@
                 const t = toMs(r.hours, r.minutes, r.seconds, r.ms);
                 let diff = (t < best && best !== Infinity) ? `<span style="color:#00ff88;">(-${fmt(best-t)})</span>` : '';
                 if(t < best) best = t;
-                html = `<li style="padding:10px; border-bottom:1px solid #222;"><b>${fmt(t)}</b> ${diff} <br><small>${new Date(r.created_at).toLocaleDateString()}</small></li>` + html;
+                html = `<li class="history-item"><div><b>${fmt(t)}</b> ${diff}<br><small>${new Date(r.created_at).toLocaleDateString()}</small></div><span>${r.version}</span></li>` + html;
             });
+            document.getElementById('histTitle').textContent = `Historia: ${name}`;
             document.getElementById('historyList').innerHTML = html;
             document.getElementById('historyModal').style.display = 'flex';
         }
