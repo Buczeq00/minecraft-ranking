@@ -211,45 +211,61 @@
         }
 
         function render() {
-            const tbody = document.getElementById('leaderboardBody');
-            tbody.innerHTML = '';
-            const bests = {};
-            speedruns.forEach(r => {
-                const total = toMs(r.hours, r.minutes, r.seconds, r.ms);
-                if(!bests[r.name] || total < bests[r.name].total) bests[r.name] = {...r, total};
-            });
-            const sorted = Object.values(bests).sort((a,b) => a.total - b.total);
+    const tbody = document.getElementById('leaderboardBody');
+    if (!tbody) return; 
+    
+    tbody.innerHTML = '';
+    
+    // Logika grupowania najlepszych wyników (tylko 1 najlepszy wynik na gracza)
+    const bests = {};
+    speedruns.forEach(r => {
+        const total = toMs(r.hours, r.minutes, r.seconds, r.ms);
+        if(!bests[r.name] || total < bests[r.name].total) bests[r.name] = {...r, total};
+    });
+    
+    const sorted = Object.values(bests).sort((a,b) => a.total - b.total);
 
-            if(sorted.length > 0) {
-                const wr = sorted[0];
-                document.getElementById('heroBox').style.display = 'flex';
-                document.getElementById('hNameTag').textContent = wr.name;
-                document.getElementById('hSkin').src = `https://mc-heads.net/body/${wr.name}`;
-                document.getElementById('hVer').textContent = `Minecraft ${wr.version}`;
-                document.getElementById('hSeed').textContent = wr.seed ? `SEED: ${wr.seed}` : 'SEED: BRAK';
-                
-                // Uruchom animację tylko jeśli czas się zmienił lub to pierwsze ładowanie
-                if(wr.total !== wrTimeMs) {
-                    wrTimeMs = wr.total;
-                    animateTime(wr.total);
-                }
-            }
+    // Aktualizacja statystyk na górze strony (liczba biegów i WR)
+    const totalRunsDisplay = document.getElementById('totalRuns');
+    const wrDisplay = document.getElementById('worldRecordTime');
+    
+    if (totalRunsDisplay) totalRunsDisplay.textContent = speedruns.length;
+    
+    if(sorted.length > 0) {
+        const wr = sorted[0];
+        if (wrDisplay && wr.total !== wrTimeMs) {
+            wrTimeMs = wr.total;
+            animateTime(wr.total, 'worldRecordTime'); 
+        }
+    }
 
-            sorted.forEach((run, i) => {
-                const row = document.createElement('tr');
-                let nCls = i === 0 ? 'nick-1' : '';
-                if(i < 3) row.classList.add(`top-${i+1}`);
-                row.innerHTML = `
-                    <td><b>${i+1}</b></td>
-                    <td><img src="https://mc-heads.net/avatar/${run.name}/32" class="player-head"><span class="${nCls}">${run.name}</span> <span style="cursor:pointer;opacity:0.4;" onclick="showHistory('${run.name}')">ⓘ</span></td>
-                    <td><b style="font-family:'VT323',monospace; font-size:1.2rem;">${fmt(run.total)}</b></td>
-                    <td>${run.version}</td>
-                    <td>
-                        <button onclick="downloadCard('${run.name}','${fmt(run.total)}',${i+1},'${run.version}')" style="background:none; border:none; cursor:pointer;">🗺️</button>
-                        <button onclick="delRun(${run.id})" style="background:none; border:none; cursor:pointer; margin-left:10px;">🧨</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
+    // Generowanie wierszy tabeli z Seedem
+    sorted.forEach((run, i) => {
+        const row = document.createElement('tr');
+        if(i < 3) row.classList.add(`top-${i+1}`);
+        
+        row.innerHTML = `
+            <td><b>${i+1}</b></td>
+            <td>
+                <img src="https://mc-heads.net/avatar/${run.name}/32" class="player-head">
+                <span class="${i===0 ? 'nick-1' : ''}">${run.name}</span>
+                <span style="cursor:pointer;opacity:0.4;margin-left:5px;" onclick="showHistory('${run.name}')">ⓘ</span>
+            </td>
+            <td>
+                <div style="font-family:'VT323',monospace; font-size:1.3rem; line-height:1;">${fmt(run.total)}</div>
+                <div style="font-size:0.65rem; color: #00ff88; opacity:0.6; margin-top: 4px; font-family: 'Orbitron';">
+                    ${run.seed ? 'SEED: ' + run.seed : 'SEED: BRAK'}
+                </div>
+            </td>
+            <td>${run.version}</td>
+            <td>
+                <button onclick="downloadCard('${run.name}','${fmt(run.total)}',${i+1},'${run.version}')" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">🗺️</button>
+                <button onclick="delRun(${run.id})" style="background:none; border:none; cursor:pointer; margin-left:10px; font-size:1.2rem; opacity:0.5;">🧨</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
             });
         }
 
@@ -336,3 +352,4 @@
     </script>
 </body>
 </html>
+
